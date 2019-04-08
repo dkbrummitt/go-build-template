@@ -16,8 +16,14 @@ limitations under the License.
 
 package main
 
-import "log"
+import (
+	"fmt"
+	"log"
+
+	version "github.com/dkbrummitt/go-build-template/pkg/version"
+)
 
 func main() {
 	log.Printf("hello, world!")
+	fmt.Println("MyApp", version.GetVersion())
 }
