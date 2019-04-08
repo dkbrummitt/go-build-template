@@ -37,7 +37,13 @@ export GOOS="${OS}"
 export GO111MODULE=on
 export GOFLAGS="-mod=vendor"
 
+#export GO111MODULE=on
+# go mod init
+# go mod vendor # if you have vendor/ folder, will automatically integrate
+go build
+
+echo Release date: $RELEASE_DATE
 go install                                                      \
     -installsuffix "static"                                     \
-    -ldflags "-X $(go list -m)/pkg/version.VERSION=${VERSION}"  \
+-ldflags "-s -w -X $(go list -m)/pkg/version.VERSION=${VERSION} -X $(go list -m)/pkg/version.RELEASE_DATE=${RELEASE_DATE} -X $(go list -m)/pkg/version.GoVersion=${GO_VERSION}"  \
     ./...
