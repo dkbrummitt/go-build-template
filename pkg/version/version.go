@@ -16,6 +16,24 @@ limitations under the License.
 
 package version
 
-// VERSION is the app-global version string, which should be substituted with a
+import (
+	"fmt"
+)
+
+// VERSION is the global version string, which should be substituted with a
 // real value during build.
 var VERSION = "UNKNOWN"
+
+// ReleaseDate is the global release date string, which should be
+// substituted with a real value during build.
+var RELEASE_DATE = "UNKNOWN"
+
+// GoVersion is the global go lang version string, which should be
+// substituted with a real value during build.
+var GoVersion = "UNKNOWN"
+
+// GetVersion global func that returns the formatted version string
+func GetVersion() string {
+	var vFormat = "v%s, Released %s (Go %s)"
+	return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE, GoVersion)
+}
