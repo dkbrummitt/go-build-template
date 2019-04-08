@@ -16,13 +16,18 @@
 BIN := myapp
 
 # Where to push the docker image.
-REGISTRY ?= thockin
+REGISTRY ?= dkbrummitt
 
 # This version-strategy uses git tags to set the version string
 VERSION := $(shell git describe --tags --always --dirty)
 #
 # This version-strategy uses a manual value to set the version string
 #VERSION := 1.2.3
+
+# This Release Date sets the date of the build
+RELEASE_DATE := $(shell date +%Y-%m-%d,%H:%M:%S)
+# GO_VERSION := $(shell go version |awk '{print $3}'|sed "s/go//g")
+GO_VERSION := 1.12.1
 
 ###
 ### These variables should not need tweaking.
@@ -109,6 +114,8 @@ $(OUTBIN): .go/$(OUTBIN).stamp
 	        ARCH=$(ARCH)                                        \
 	        OS=$(OS)                                            \
 	        VERSION=$(VERSION)                                  \
+	        RELEASE_DATE=$(RELEASE_DATE)                        \
+	        GO_VERSION=$(GO_VERSION)                            \
 	        ./build/build.sh                                    \
 	    "
 	@if ! cmp -s .go/$(OUTBIN) $(OUTBIN); then \
