@@ -40,7 +40,7 @@ export GOFLAGS="-mod=vendor"
 #export GO111MODULE=on
 # go mod init
 # go mod vendor # if you have vendor/ folder, will automatically integrate
-go build
+# go build
 
 echo Release date: $RELEASE_DATE
 go install                                                      \
