@@ -26,8 +26,7 @@ VERSION := $(shell git describe --tags --always --dirty)
 
 # This Release Date sets the date of the build
 RELEASE_DATE := $(shell date +%Y-%m-%d,%H:%M:%S)
-# GO_VERSION := $(shell go version |awk '{print $3}'|sed "s/go//g")
-GO_VERSION := 1.12.1
+GO_VERSION := $(shell go version |awk '{print $$3}'|sed 's/go//g')
 
 ###
 ### These variables should not need tweaking.
