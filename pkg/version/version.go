@@ -34,6 +34,27 @@ var GoVersion = "UNKNOWN"
 
 // GetVersion global func that returns the formatted version string
 func GetVersion() string {
-	var vFormat = "v%s, Released %s (Go %s)"
-	return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE, GoVersion)
+	var vFormat = "v%s"
+	var rFormat = "Released %s"
+	var gFormat = "(Go %s)"
+	var spf = "a"
+
+	if RELEASE_DATE != "" && RELEASE_DATE != "UNKNOWN" {
+		vFormat = vFormat + " " + rFormat
+		spf += "b"
+	}
+	if GoVersion != "" && GoVersion != "UNKNOWN" {
+		vFormat = vFormat + " " + gFormat
+		spf += "c"
+	}
+	switch spf { //build version string based on what is provided
+	case "a":
+		return fmt.Sprintf(vFormat, VERSION)
+	case "ab":
+		return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE)
+	case "ac":
+		return fmt.Sprintf(vFormat, VERSION, GoVersion)
+	default:
+		return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE, GoVersion)
+	}
 }
