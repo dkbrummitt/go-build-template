@@ -35,14 +35,18 @@ export CGO_ENABLED=0
 export GOARCH="${ARCH}"
 export GOOS="${OS}"
 export GO111MODULE=on
-export GOFLAGS="-mod=vendor"
+if [ -d "./vendor" ]; then   # if vendoring is detected, support it as build process
+    echo "Supporting Vendoring"
+    export GOFLAGS="-mod=vendor"
+else # else use go get
+    echo "No Vendoring required, executing go-get"
+    go get ./...
+fi
 
-#export GO111MODULE=on
-# go mod init
-# go mod vendor # if you have vendor/ folder, will automatically integrate
-# go build
+echo VERSION: $VERSION
+echo RELEASE_DATE: $RELEASE_DATE
+echo GO_VERSION: $GO_VERSION
 
-echo Release date: $RELEASE_DATE
 go install                                                      \
     -installsuffix "static"                                     \
 -ldflags "-s -w -X $(go list -m)/pkg/version.VERSION=${VERSION} -X $(go list -m)/pkg/version.RELEASE_DATE=${RELEASE_DATE} -X $(go list -m)/pkg/version.GoVersion=${GO_VERSION}"  \

@@ -20,8 +20,13 @@ set -o pipefail
 
 export CGO_ENABLED=0
 export GO111MODULE=on
-export GOFLAGS="-mod=vendor"
-
+if [ -d "./vendor" ]; then   # if vendoring is detected, support it as build process
+    echo "Supporting Vendoring"
+    export GOFLAGS="-mod=vendor"
+else # else use go get
+    echo "No Vendoring required, executing go-get"
+    go get ./...
+fi
 TARGETS=$(for d in "$@"; do echo ./$d/...; done)
 
 echo "Running tests:"
