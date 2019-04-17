@@ -17,13 +17,25 @@ limitations under the License.
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
-	version "github.com/dkbrummitt/go-build-template/pkg/version"
+	"github.com/dkbrummitt/go-build-template/pkg/stats"
+	"github.com/dkbrummitt/go-build-template/pkg/version"
 )
 
 func main() {
 	log.Printf("hello, world!")
+	//sample of version data that can be logged or sent to monitoring/usage-tracking
 	fmt.Println("MyApp", version.GetVersion())
+
+	//Sample pull of stats data that can be logged or sent to monitoring
+	st := stats.NewStats(stats.StatsOptions{})
+	st.PullStats()
+	b, err := json.Marshal(st)
+	if err != nil {
+		fmt.Println("Error marshalling stats:", err)
+	}
+	fmt.Println(string(b))
 }
