@@ -38,9 +38,9 @@ type Host struct {
 	Uptime string `json:"uptime,omitempty"`
 }
 type Disk struct {
-	Total        uint64  `json:"total,omitempty"`
-	Free         uint64  `json:"free,omitempty"`
-	Used         uint64  `json:"used,omitempty"`
+	Total        uint64  `json:"totalBytes,omitempty"`
+	Free         uint64  `json:"freeBytes,omitempty"`
+	Used         uint64  `json:"usedBytes,omitempty"`
 	UsedPerc     float64 `json:"usedPercentage,omitempty"`
 	MaxPercLimit float64 `json:"maxPercentage,omitempty"`
 	Status       string  `json:"status,omitempty"`
@@ -50,9 +50,9 @@ type NetData struct {
 	MacAddr string `json:"macAddress,omitempty"`
 }
 type Mem struct {
-	Total        uint64  `json:"total,omitempty"`
-	Free         uint64  `json:"free,omitempty"`
-	Used         uint64  `json:"used,omitempty"`
+	Total        uint64  `json:"totalBytes,omitempty"`
+	Free         uint64  `json:"freeBytes,omitempty"`
+	Used         uint64  `json:"usedBytes,omitempty"`
 	UsedPerc     float64 `json:"usedPercentage,omitempty"`
 	MaxPercLimit float64 `json:"maxPercentage,omitempty"`
 	Status       string  `json:"status,omitempty"`
