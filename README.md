@@ -7,6 +7,8 @@ universal API to software projects) and a Dockerfile to build a docker image.
 
 This has only been tested on Linux, and depends on Docker to build.
 
+**This template requires Go 1.11 or higher**
+
 ## Customizing it
 
 To use this, simply copy these files and make the following changes:
