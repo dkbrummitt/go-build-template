@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"go.opencensus.io/exporter/prometheus"
+	"contrib.go.opencensus.io/exporter/prometheus"
 	"go.opencensus.io/stats/view"
 )
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"go.opencensus.io/exporter/jaeger"
+	"contrib.go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 )
