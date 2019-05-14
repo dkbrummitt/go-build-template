@@ -10,9 +10,18 @@ import (
 	"go.opencensus.io/trace"
 )
 
+const (
+	defaultJaegerAgentPort = "6831"
+	defaultJaegerPort      = "14268"
+)
+
 var (
-	jaegerSvcAddr = os.Getenv("JAEGER_SERVICE_ADDR")
-	jaegerSvcPro  = os.Getenv("JAEGER_SERVICE_PROTOCOL")
+	jaegerSvcAddr   = os.Getenv("JAEGER_SERVICE_ADDR")
+	jaegerSvcPro    = os.Getenv("JAEGER_SERVICE_PROTOCOL")
+	jaegerSvcPort   = os.Getenv("JAEGER_SERVICE_PORT")
+	jaegerAgentAddr = os.Getenv("JAEGER_AGENT_ADDR")
+	jaegerAgentPro  = os.Getenv("JAEGER_AGENT_PROTOCOL")
+	jaegerAgentPort = os.Getenv("JAEGER_AGENT_PORT")
 )
 
 type JaegerTracer struct {
@@ -37,13 +46,27 @@ func initJaegerTracing(sn string) (JaegerTracer, error) {
 		jaegerSvcPro = defaultProtocol
 	}
 
+	if jaegerSvcPort == "" {
+		jaegerSvcPort = defaultJaegerPort
+	}
+
+	if jaegerAgentPort == "" {
+		jaegerAgentPort = defaultJaegerAgentPort
+	}
+
+	agentEndpointURI := fmt.Sprintf("%s:%s", jaegerAgentAddr, jaegerAgentPort)
+	collectorEndpointURI := fmt.Sprintf("%s://%s:%s/api/traces", jaegerSvcPro, jaegerSvcAddr, jaegerSvcPort)
+
 	//create the exporter
-	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("%s://%s", jaegerSvcPro, jaegerSvcAddr),
-		Process: jaeger.Process{
-			ServiceName: sn,
-		},
-	})
+	exporter, err := jaeger.NewExporter(
+		jaeger.Options{
+			AgentEndpoint:     agentEndpointURI,
+			CollectorEndpoint: collectorEndpointURI,
+			// Endpoint:          fmt.Sprintf("%s://%s:%s", jaegerSvcPro, jaegerSvcAddr, jaegerSvcPort),
+			Process: jaeger.Process{
+				ServiceName: sn,
+			},
+		})
 	if err != nil {
 		return jt, err
 	}
@@ -55,6 +78,7 @@ func initJaegerTracing(sn string) (JaegerTracer, error) {
 	}
 	return jt, err
 }
+
 func (jt *JaegerTracer) RegisterViews(views ...view.View) {
 	for _, v := range views {
 		//TODO how to load views to existing exporter on init...

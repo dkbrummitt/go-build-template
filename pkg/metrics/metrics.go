@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"go.opencensus.io/stats"
@@ -21,7 +22,6 @@ const (
 var (
 	env = os.Getenv("ENV")
 	//DefaultKeys/Tags
-
 	KeyApp, _      = tag.NewKey("application")
 	KeyVersion, _  = tag.NewKey("version")
 	KeyRegion, _   = tag.NewKey("region")
@@ -33,9 +33,28 @@ var (
 	KeyError, _    = tag.NewKey("error")
 )
 
+func InitMetrics(sn string, tc trace.Config) {
+	_, err := initJaegerTracing(sn)
+	if err != nil {
+		fmt.Println("WARNING unable to initialize Jaeger Tracing", err.Error())
+		//clear the error
+		err = nil
+	}
+	initTraceConfigs(tc)
+
+	rptPeriod := 0
+	if os.Getenv("METRICS_REPORTING_PERIOD") != "" {
+		rptPeriod, err = strconv.Atoi(os.Getenv("METRICS_REPORTING_PERIOD"))
+		if err != nil {
+			fmt.Println("WARNING env variable METRICS_REPORTING_PERIOD is not a number:", os.Getenv("METRICS_REPORTING_PERIOD"))
+		}
+	}
+	initViewReporting(rptPeriod)
+}
+
 //initTraceConfigs Defaults to 10% of requests... recommended tracing should be closer to 1%
 //per google folks. By default open census samples 1 in 10000 traces.
-//this function overrides that default
+//this function overrides that default. NOTE if you are just running locally, then AlwaysSample is the default
 func initTraceConfigs(tc trace.Config) {
 	if env == "local" && tc.DefaultSampler == nil {
 		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
@@ -47,15 +66,17 @@ func initTraceConfigs(tc trace.Config) {
 		//set default config
 		trace.ApplyConfig(trace.Config{DefaultSampler: trace.ProbabilitySampler(defaultProbability)})
 	}
-}
+} //initTraceConfigs
 
 func initViewReporting(rptPeriod int) {
+
 	view.SetReportingPeriod(defaultReportingPeriod * time.Second)
 	if rptPeriod != 0 {
 		view.SetReportingPeriod(time.Duration(rptPeriod) * time.Second)
 	}
-}
-func initLatencyView(name string, tags ...tag.Key) (*view.View, error) {
+} //initViewReporting
+
+func AddLatencyView(name string, tags ...tag.Key) (*view.View, error) {
 	latencyView := &view.View{
 		Name:        name + "/latency",
 		Measure:     getMeasure(name),
@@ -66,15 +87,18 @@ func initLatencyView(name string, tags ...tag.Key) (*view.View, error) {
 		Aggregation: view.Distribution(0, 25, 50, 75, 100, 200, 400, 600, 800, 1000, 2000, 4000, 6000),
 		TagKeys:     tags}
 	err := view.Register(latencyView)
+
 	return latencyView, err
-}
+} //AddLatencyView
+
 func getMeasure(name string) *stats.Float64Measure {
 	latencyMS := stats.Float64(fmt.Sprintf("%s/latency", name), "The latency in milliseconds per "+name+" loop", "ms")
 	return latencyMS
-}
+} //getMeasure
+
 func sinceInMilliseconds(startTime time.Time) float64 {
 	return float64(time.Since(startTime).Nanoseconds()) / 1e6
-}
+} //sinceInMilliseconds
 
 /* Code sample for spanning/tracing with stats
  */
