@@ -3,10 +3,10 @@ package metrics
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 
 	"contrib.go.opencensus.io/exporter/jaeger"
-	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 )
 
@@ -24,23 +24,23 @@ var (
 	jaegerAgentPort = os.Getenv("JAEGER_AGENT_PORT")
 )
 
-type JaegerTracer struct {
-	Exporter *jaeger.Exporter
-}
+func initJaegerTracing(opts MetricOptions) (err error) {
 
-func initJaegerTracing(sn string) (JaegerTracer, error) {
-	var err error
-	jt := JaegerTracer{}
-	//check to see if feature is enabled
+	// For tracing we have to do pretty much the same but using
+	// the Jaeger exporter. We also have to tell the exporter
+	// where it should send these traces:
 	if jaegerSvcAddr == "" {
 		//Feature disabled, quit early
-		return jt, err
+		fmt.Println("WARNING Jaeger disabled")
+		return
 	}
+	if opts.ServiceName == "" {
+		fmt.Println("ERROR: Jaeger Missing/Empty ServiceName")
+		return errors.New("A non-empty service name is required to enable tracing")
+	}
+	fmt.Println("Initializing Jaeger")
 
-	//validate we have a valid service name
-	if sn == "" {
-		return jt, errors.New("A non-empty service name is required to enable tracing")
-	}
+	// set defaults
 
 	if jaegerSvcPro == "" {
 		jaegerSvcPro = defaultProtocol
@@ -54,36 +54,26 @@ func initJaegerTracing(sn string) (JaegerTracer, error) {
 		jaegerAgentPort = defaultJaegerAgentPort
 	}
 
-	agentEndpointURI := fmt.Sprintf("%s:%s", jaegerAgentAddr, jaegerAgentPort)
-	collectorEndpointURI := fmt.Sprintf("%s://%s:%s/api/traces", jaegerSvcPro, jaegerSvcAddr, jaegerSvcPort)
+	// trace.ApplyConfig(trace.Config{
+	// 	DefaultSampler: trace.AlwaysSample(),
+	// })
+	agentEndpointURI := "localhost:6831"
+	collectorEndpointURI := "http://localhost:14268/api/traces"
+	fmt.Println("\t Jaeger agentEndpointURI", agentEndpointURI)
+	fmt.Println("\t Jaeger collectorEndpointURI", collectorEndpointURI)
+	agentEndpointURI = fmt.Sprintf("%s:%s", jaegerAgentAddr, jaegerAgentPort)
+	collectorEndpointURI = fmt.Sprintf("%s://%s:%s/api/traces", jaegerSvcPro, jaegerSvcAddr, jaegerSvcPort)
+	fmt.Println("\t Jaeger agentEndpointURI*", agentEndpointURI)
+	fmt.Println("\t Jaeger collectorEndpointURI*", collectorEndpointURI)
 
-	//create the exporter
-	exporter, err := jaeger.NewExporter(
-		jaeger.Options{
-			AgentEndpoint:     agentEndpointURI,
-			CollectorEndpoint: collectorEndpointURI,
-			// Endpoint:          fmt.Sprintf("%s://%s:%s", jaegerSvcPro, jaegerSvcAddr, jaegerSvcPort),
-			Process: jaeger.Process{
-				ServiceName: sn,
-			},
-		})
+	jex, err := jaeger.NewExporter(jaeger.Options{
+		AgentEndpoint:     agentEndpointURI,
+		CollectorEndpoint: collectorEndpointURI,
+		ServiceName:       opts.ServiceName,
+	})
 	if err != nil {
-		return jt, err
+		log.Fatalf("Failed to create Jaeger exporter: %s", err.Error())
 	}
-
-	//register it
-	trace.RegisterExporter(exporter)
-	jt = JaegerTracer{
-		Exporter: exporter,
-	}
-	return jt, err
-}
-
-func (jt *JaegerTracer) RegisterViews(views ...view.View) {
-	for _, v := range views {
-		//TODO how to load views to existing exporter on init...
-		//or after the fact?
-		//view.RegisterExporter(&jt.Exporter)
-		fmt.Println("View:", v)
-	}
+	trace.RegisterExporter(jex)
+	return
 }
