@@ -58,3 +58,9 @@ func GetVersion() string {
 		return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE, GoVersion)
 	}
 }
+
+func GetVersionSimple() string {
+	var vFormat = "v%s"
+
+	return fmt.Sprintf(vFormat, VERSION)
+}

@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"contrib.go.opencensus.io/exporter/prometheus"
@@ -13,7 +14,11 @@ var (
 	prometheusSvcPro  = os.Getenv("PROMETHEUS_SERVICE_PROTOCOL")
 )
 
-func initPrometheusTracing(ns string) error {
+func initPrometheusTracing(opts MetricOptions) error {
+	// To export metrics for Prometheus, we have to create a
+	// Prometheus exporter, attach it to stats view, and register
+	// the exporter with the HTTP request muxer:
+
 	var err error
 
 	//check to see if feature is enabled
@@ -23,9 +28,10 @@ func initPrometheusTracing(ns string) error {
 	}
 
 	//validate we have a valid name space
-	if ns == "" {
+	if opts.ServiceName == "" {
 		return errors.New("A non-empty name-space is required to enable tracing")
 	}
+	fmt.Println("Initializing Prometheus")
 
 	if prometheusSvcPro == "" {
 		prometheusSvcPro = defaultProtocol
@@ -34,23 +40,14 @@ func initPrometheusTracing(ns string) error {
 	//create the exporter
 	exporter, err := prometheus.NewExporter(prometheus.Options{
 		// Endpoint: fmt.Sprintf("%s://%s", prometheusSvcPro, prometheusSvcAddr),
-		Namespace: ns,
+		Namespace: opts.ServiceName,
 	})
 	if err != nil {
 		return err
 	}
 	//register general view exporter
 	view.RegisterExporter(exporter)
+	opts.Mux.Handle("/metrics", exporter)
 
 	return err
 }
-
-//Add view/stat?
-func addViewStat() {}
-
-//in code usage
-//stats.Record(ctx, statName.M(int64(someIntValue))) // for simple count
-
-//tracing
-// ctx, span:= trace.StartSpan(stc,"/messages")
-// defer span.End()
