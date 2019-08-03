@@ -1,40 +1,45 @@
-/*
-Copyright 2016 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package version
 
 import (
 	"fmt"
 )
 
-// VERSION is the global version string, which should be substituted with a
-// real value during build.
-var VERSION = "UNKNOWN"
+var (
+	// VERSION is the global version string, which should be substituted with a
+	// real value during build via LDFLAGS.
+	VERSION = "UNKNOWN"
+	// RELEASE_DATE is the global release date string, which should be
+	// substituted with a real value during build via LDFLAGS.
+	RELEASE_DATE = "UNKNOWN"
 
-// ReleaseDate is the global release date string, which should be
-// substituted with a real value during build.
-var RELEASE_DATE = "UNKNOWN"
+	// GO_VERSION is the global go lang version string, which should be
+	// substituted with a real value during build via LDFLAGS.
+	GO_VERSION = "UNKNOWN"
+)
 
-// GoVersion is the global go lang version string, which should be
-// substituted with a real value during build.
-var GoVersion = "UNKNOWN"
-
-// GetVersion global func that returns the formatted version string
+// GetVersion global func that returns the formatted detailed version string
+// that contains version, release date, and go version used for this build.
+// Possible formats include:
+//  1.0.2
+//  1.0.2 2019-03-31
+//	1.02 Go 1.12.7
+//	1.02 2019-03-31 Go 1.12.7
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - Formatted string representation of the version, that includes
+//   version number, release/build date, and go lang version.
+// Errors:
+// - None
+// Dev Notes:
+// - None
 func GetVersion() string {
-	var vFormat = "v%s"
+	var vFormat = "%s"
 	var rFormat = "Released %s"
 	var gFormat = "(Go %s)"
 	var spf = "a"
@@ -43,24 +48,38 @@ func GetVersion() string {
 		vFormat = vFormat + " " + rFormat
 		spf += "b"
 	}
-	if GoVersion != "" && GoVersion != "UNKNOWN" {
+	if GO_VERSION != "" && GO_VERSION != "UNKNOWN" {
 		vFormat = vFormat + " " + gFormat
 		spf += "c"
 	}
-	switch spf { //build version string based on what is provided
+	switch spf { // build version string based on what is provided
 	case "a":
 		return fmt.Sprintf(vFormat, VERSION)
 	case "ab":
 		return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE)
 	case "ac":
-		return fmt.Sprintf(vFormat, VERSION, GoVersion)
+		return fmt.Sprintf(vFormat, VERSION, GO_VERSION)
 	default:
-		return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE, GoVersion)
+		return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE, GO_VERSION)
 	}
 }
 
+// GetVersionSimple global func that returns the formatted detailed version
+// string that contains version.
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - Formatted string representation of the version, that includes
+//   only version number. This is intended for use for metrics and heatlh.
+// Errors:
+// - None
+// Dev Notes:
+//	- Having this as a function is overkill... I should probably nix it
 func GetVersionSimple() string {
-	var vFormat = "v%s"
-
-	return fmt.Sprintf(vFormat, VERSION)
+	return VERSION
 }
