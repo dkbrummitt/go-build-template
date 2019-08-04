@@ -44,6 +44,9 @@ func GetVersion() string {
 	var gFormat = "(Go %s)"
 	var spf = "a"
 
+	if VERSION == "" || VERSION == "UNKNOWN" {
+		VERSION = "NO-STATIC-VERSION"
+	}
 	if RELEASE_DATE != "" && RELEASE_DATE != "UNKNOWN" {
 		vFormat = vFormat + " " + rFormat
 		spf += "b"
@@ -54,6 +57,7 @@ func GetVersion() string {
 	}
 	switch spf { // build version string based on what is provided
 	case "a":
+
 		return fmt.Sprintf(vFormat, VERSION)
 	case "ab":
 		return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE)
