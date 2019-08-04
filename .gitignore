@@ -19,3 +19,7 @@
 /.dockerfile-*
 
 .vscode/
+
+# compiled tests for package/lib stress testing
+*.test
+generated/
