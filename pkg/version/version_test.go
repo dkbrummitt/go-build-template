@@ -48,7 +48,7 @@ func Test_GetVersionSimple(t *testing.T) {
 		e := tstCase.v
 
 		if r != e {
-			t.Errorf("Expected version to be '%s'. Saw instead '%s'", e, r)
+			t.Errorf("Expected version to be '%s'. Saw instead '%s'.  Case: '%s' '%s' '%s'", e, r, tstCase.v, tstCase.rd, tstCase.gv)
 		}
 	}
 
@@ -101,7 +101,7 @@ func Test_GetVersion(t *testing.T) {
 		// e := tstCase.v
 
 		if r == "" {
-			t.Error("Expected version significant. Saw instead ''")
+			t.Errorf("Expected version significant. Saw instead ''. Case: '%s' '%s' '%s'", tstCase.v, tstCase.rd, tstCase.gv)
 		}
 	}
 }
