@@ -1,8 +1,7 @@
 package stats
 
 import (
-	"fmt"
-	"net"
+	"errors"
 	"runtime"
 	"time"
 
@@ -13,17 +12,8 @@ import (
 	"github.com/shirou/gopsutil/mem"
 )
 
-const (
-	defaultMax = 80.0
-)
-
-type StatsOptions struct {
-	MaxDisk float64
-	MaxHost float64
-	MaxMem  float64
-	MaxNet  float64
-}
-
+// CPUData simple data regarding the CPU used for the machine this application
+// is running on.
 type CPUData struct {
 	Vendor     string  `json:"vendor,omitempty"`
 	PhysicalID string  `json:"physicalId,omitempty"`
@@ -32,11 +22,16 @@ type CPUData struct {
 	Model      string  `json:"model,omitempty"`
 	Speed      float64 `json:"speedMhz,omitempty"`
 }
+
+// Host simple data regarding the machines host name for the machine this
+// application is running on.
 type Host struct {
 	ID     string `json:"id,omitempty"`
 	Name   string `json:"name,omitempty"`
 	Uptime string `json:"uptime,omitempty"`
 }
+
+// Disk snapshot of the disk usage for this application
 type Disk struct {
 	Total        uint64  `json:"totalBytes,omitempty"`
 	Free         uint64  `json:"freeBytes,omitempty"`
@@ -45,10 +40,8 @@ type Disk struct {
 	MaxPercLimit float64 `json:"maxPercentage,omitempty"`
 	Status       string  `json:"status,omitempty"`
 }
-type NetData struct {
-	Name    string `json:"name,omitempty"`
-	MacAddr string `json:"macAddress,omitempty"`
-}
+
+// Mem memory snapshot of the disk usage for this application
 type Mem struct {
 	Total        uint64  `json:"totalBytes,omitempty"`
 	Free         uint64  `json:"freeBytes,omitempty"`
@@ -57,87 +50,101 @@ type Mem struct {
 	MaxPercLimit float64 `json:"maxPercentage,omitempty"`
 	Status       string  `json:"status,omitempty"`
 }
-type Nets struct {
-	Cnt int       `json:"count,omitempty"`
-	Net []NetData `json:"cpu,omitempty"`
-}
+
+// CPUs aggregated CPU data for the machine this application is running on
 type CPUs struct {
 	Cnt int       `json:"count,omitempty"`
 	CPU []CPUData `json:"cpu,omitempty"`
 }
-type Stats struct {
+
+// SystemDetails details about the machine this application is running on.
+type SystemDetails struct {
 	OS   string `json:"os,omitempty"`
 	CPUs *CPUs  `json:"cpu,omitempty"`
 	Disk *Disk  `json:"disk,omitempty"`
 	Host *Host  `json:"host,omitempty"`
 	Mem  *Mem   `json:"mem,omitempty"`
-	Nets *Nets  `json:"net,omitempty"`
 }
 
-func NewStats(opts StatsOptions) Stats {
-	s := Stats{}
-	validateOpts(&opts) //validate and set defaults
-	s.Disk = &Disk{}
-	s.Disk.MaxPercLimit = opts.MaxDisk
-	s.Mem = &Mem{}
-	s.Mem.MaxPercLimit = opts.MaxMem
-
-	return s
+// Options initialization data/configurations for Stats
+type Options struct {
+	//StartTime the time that this application was started (e.g., time.Now())
+	StartTime time.Time `json:"startTime,omitempty"`
 }
 
-func validateOpts(opts *StatsOptions) {
-
-	if opts.MaxDisk == 0.0 {
-		opts.MaxDisk = defaultMax
-	}
-	if opts.MaxHost == 0.0 {
-		opts.MaxHost = defaultMax
-	}
-	if opts.MaxMem == 0.0 {
-		opts.MaxMem = defaultMax
-	}
-	if opts.MaxNet == 0.0 {
-		opts.MaxNet = defaultMax
-	}
+// Stats aggregated snapshot of the state of the machine this application is
+// running on
+type Stats struct {
+	//SysDetails details about the system/machine the application is running on
+	SysDetails *SystemDetails `json:"sysDetails,omitempty"`
+	//AppDetails details about the application
+	AppDetails map[string]interface{} `json:"appDetails,omitempty"`
 }
 
-func (s *Stats) UpdateOpts(opts StatsOptions) {
-	validateOpts(&opts) //validate and set defaults
-
-	s.Disk.MaxPercLimit = opts.MaxDisk
-	s.Mem.MaxPercLimit = opts.MaxMem
-}
-
-func (s *Stats) pullMem() error {
+// pullMem gather memory usage/availablity info
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - None
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func (s *Stats) pullMem() (err error) {
+	if s == nil {
+		err = errors.New("Stats should be initialized before use. (pullMem)")
+		return
+	}
 	vmStat, err := mem.VirtualMemory()
 
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return
 	}
-	s.Mem.Total = vmStat.Total
-	s.Mem.Free = vmStat.Free
-	s.Mem.Used = vmStat.Used
-	s.Mem.UsedPerc = vmStat.UsedPercent
-	if s.Mem.UsedPerc <= s.Mem.MaxPercLimit {
-		s.Mem.Status = "OK"
+	if s.SysDetails.Mem == nil {
+		s.SysDetails.Mem = &Mem{}
 	}
-	if s.Mem.UsedPerc > s.Mem.MaxPercLimit {
-		s.Mem.Status = "NOT OK"
-	}
-	return err
+
+	s.SysDetails.Mem.Total = vmStat.Total
+	s.SysDetails.Mem.Free = vmStat.Free
+	s.SysDetails.Mem.Used = vmStat.Used
+	s.SysDetails.Mem.UsedPerc = vmStat.UsedPercent
+
+	return
 }
 
-func (s *Stats) pullCPU() error {
+// pullCPU gather CPU info
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - None
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func (s *Stats) pullCPU() (err error) {
+	if s == nil {
+		err = errors.New("Stats should be initialized before use. (pullCPU)")
+		return
+	}
 	cpuStat, err := cpu.Info()
+
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return
 	}
-	if s.CPUs == nil {
-		s.CPUs = &CPUs{}
+	if s.SysDetails.CPUs == nil {
+		s.SysDetails.CPUs = &CPUs{}
 	}
-	s.CPUs.Cnt = len(cpuStat)
+	s.SysDetails.CPUs.Cnt = len(cpuStat)
 	for _, cpu := range cpuStat {
 		var st = CPUData{}
 		st.Cores = cpu.Cores
@@ -146,80 +153,169 @@ func (s *Stats) pullCPU() error {
 		st.Vendor = cpu.VendorID
 		st.Speed = cpu.Mhz
 		st.PhysicalID = cpu.PhysicalID
-		s.CPUs.CPU = append(s.CPUs.CPU, st)
+		s.SysDetails.CPUs.CPU = append(s.SysDetails.CPUs.CPU, st)
 	}
-	return err
+
+	return
 }
 
-func (s *Stats) pullDisk() error {
+// pullDisk gather disk usage/availablity info
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - None
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func (s *Stats) pullDisk() (err error) {
+	if s == nil {
+		err = errors.New("Stats should be initialized before use. (pullDisk)")
+		return
+	}
 	diskStat, err := disk.Usage("/")
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return
 	}
-	s.Disk.Total = diskStat.Total
-	s.Disk.Free = diskStat.Free
-	s.Disk.Used = diskStat.Used
-	s.Disk.UsedPerc = diskStat.UsedPercent
-	if s.Disk.UsedPerc <= s.Disk.MaxPercLimit {
-		s.Disk.Status = "OK"
+	if s.SysDetails.Disk == nil {
+		s.SysDetails.Disk = &Disk{}
 	}
-	if s.Disk.UsedPerc > s.Disk.MaxPercLimit {
-		s.Disk.Status = "NOT OK"
-	}
-	return err
+	s.SysDetails.Disk.Total = diskStat.Total
+	s.SysDetails.Disk.Free = diskStat.Free
+	s.SysDetails.Disk.Used = diskStat.Used
+	s.SysDetails.Disk.UsedPerc = diskStat.UsedPercent
+
+	return
 }
 
-func (s *Stats) pullHost() error {
-	var err error
+// pullHost gather host info
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - None
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func (s *Stats) pullHost() (err error) {
+	if s == nil {
+		err = errors.New("Stats should be initialized before use. (pullHost)")
+		return
+	}
 
 	hostStat, err := host.Info()
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
-	if s.Host == nil {
-		s.Host = &Host{}
+	if s.SysDetails.Host == nil {
+		s.SysDetails.Host = &Host{}
 	}
-	s.Host.ID = hostStat.HostID
-	s.Host.Name = hostStat.Hostname
-	// var up time.Duration = time.Duration(hostStat.Uptime) * time.Nanosecond)
-	s.Host.Uptime = (time.Duration(hostStat.Uptime) * time.Second).String()
-	return err
+	s.SysDetails.Host.ID = hostStat.HostID
+	s.SysDetails.Host.Name = hostStat.Hostname
+	s.SysDetails.Host.Uptime = (time.Duration(hostStat.Uptime) * time.Second).String()
+
+	return
 }
 
-func (s *Stats) pullNet() error {
-	var err error
-	netStats, err := net.Interfaces()
-	if err != nil {
-		fmt.Println(err)
-		return err
+// pullUptime if startTime is provided, then calcuate the amount of time this
+// application has been running. Otherwise sets uptime as UNKNOWN
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - None
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func (s *Stats) pullUptime() (err error) {
+	if s == nil {
+		err = errors.New("Stats should be initialized before use. (pullUptime)")
+		return
 	}
-	if s.Nets == nil {
-		s.Nets = &Nets{}
-	}
-	s.Nets.Cnt = len(netStats)
-	for _, netStat := range netStats {
-		net := NetData{}
-		net.Name = netStat.Name
-		net.MacAddr = netStat.HardwareAddr.String()
-		s.Nets.Net = append(s.Nets.Net, net)
-		// TODO Support networking flags. // netStat.Flags.String()
-		// TODO Support IP Address(es) for loop required. //netStat.Addrs()
+	s.AppDetails["uptime"] = "UNKNOWN"
 
+	if st, ok := s.AppDetails["startTime"]; ok {
+		start := st.(time.Time)
+		uptime := time.Since(start)
+		s.AppDetails["uptime"] = uptime.String()
 	}
-	return err
+	return
 }
 
-func (s *Stats) PullStats() {
-	s.pullMem()
-	s.pullCPU()
-	s.pullDisk()
-	s.pullHost()
-	s.pullNet()
-	fmt.Println(runtime.GOOS)
-
-	if runtime.GOOS != s.OS {
-		s.OS = runtime.GOOS
+// PullStats gather primarily system stats. Also calculates application uptime
+// if possible
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - None
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func (s *Stats) PullStats() (err error) {
+	if s == nil {
+		err = errors.New("Stats should be initialized before use. (PullStats)")
+		return
 	}
+
+	if s.SysDetails == nil {
+		s.SysDetails = &SystemDetails{}
+	}
+	// s.SysDetails.Mem = &Mem{}
+	// s.SysDetails.Disk = &Mem{}
+	err = s.pullMem()
+	err = s.pullCPU()
+	err = s.pullDisk()
+	err = s.pullHost()
+	err = s.pullUptime()
+
+	if runtime.GOOS != s.SysDetails.OS {
+		s.SysDetails.OS = runtime.GOOS
+	}
+	return
+}
+
+// NewStats create a new stat data structure
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - None
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func NewStats(opts Options) Stats {
+
+	s := Stats{}
+	if !opts.StartTime.IsZero() {
+		s.AppDetails = make(map[string]interface{})
+		s.AppDetails["startTime"] = opts.StartTime
+	}
+
+	return s
 }
