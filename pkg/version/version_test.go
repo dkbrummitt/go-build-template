@@ -1,15 +1,20 @@
 package version
 
 import (
-	"fmt"
 	"testing"
 )
 
+// Some tests/benchmarks in this file are too small to test. They are
+// included to provide samples of how to
+// - write table driven tests
+// - write benchmarks
+
 // Test_GetVersionSimple_NoSet  test for performance testing to
-// determine potential improvements for this function
+// determine potential improvements for this function.
+// GetVersionSimple is considered too small to test.
 func Test_GetVersionSimple(t *testing.T) {
 	// conditions where function will succeed
-	tbls := []struct {
+	tstCases := []struct {
 		v  string // version
 		rd string // release(build) date
 		gv string // go version
@@ -34,13 +39,13 @@ func Test_GetVersionSimple(t *testing.T) {
 		{"1.0.0", "Feb 30, 2020", "1.12"},
 	}
 
-	for _, tbl := range tbls {
-		VERSION = tbl.v
-		RELEASE_DATE = tbl.rd
-		GO_VERSION = tbl.gv
+	for _, tstCase := range tstCases {
+		VERSION = tstCase.v
+		RELEASE_DATE = tstCase.rd
+		GO_VERSION = tstCase.gv
 
 		r := GetVersionSimple()
-		e := tbl.v
+		e := tstCase.v
 
 		if r != e {
 			t.Errorf("Expected version to be '%s'. Saw instead '%s'", e, r)
@@ -62,7 +67,7 @@ func Benchmark_GetVersionSimple(b *testing.B) {
 // determine potential improvements for this function
 func Test_GetVersion(t *testing.T) {
 	// conditions where function will succeed
-	tbls := []struct {
+	tstCases := []struct {
 		v  string
 		rd string
 		gv string
@@ -87,11 +92,18 @@ func Test_GetVersion(t *testing.T) {
 		{"1.0.0", "Feb 30, 2020", "1.12"},
 	}
 
-	if false { // For Compile sake.  Remove after address FIXMEs
-		fmt.Printf("Test arguments %+v", tbls)
+	for _, tstCase := range tstCases {
+		VERSION = tstCase.v
+		RELEASE_DATE = tstCase.rd
+		GO_VERSION = tstCase.gv
+
+		r := GetVersion()
+		// e := tstCase.v
+
+		if r == "" {
+			t.Error("Expected version significant. Saw instead ''")
+		}
 	}
-	// FIX ME Is GetVersion Testable? If so, write the test for it below
-	// FIX ME If not, write the test for it below
 }
 
 // Benchmark_GetVersion Benchmark test for performance testing to
