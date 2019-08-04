@@ -27,18 +27,28 @@ for PKG in "${PKGS[@]}"
 do
     TIMESTAMP=$(date '+%Y-%m-%dT%H:%M:%S')
     PKG_BASE=$(basename $PKG)
-    go test -c $PKG
-    go test -benchmem -memprofile=$TIMESTAMP.$PKG_BASE.mem.out -cpuprofile=$TIMESTAMP.$PKG_BASE.cpu.out -bench=.  $PKG > $TIMESTAMP.$PKG_BASE.benchmark.txt
-    mkdir -p $WORKING/$PKG_BASE
-    mv *$PKG_BASE* $WORKING/$PKG_BASE
     echo ""
     echo "-----------------------------"
     echo $PKG_BASE
     echo "-----------------------------"
+
+    # echo "go test -c $PKG"
+    go test -c $PKG
+
+    # echo "go test -benchmem -memprofile=$TIMESTAMP.$PKG_BASE.mem.out -cpuprofile=$TIMESTAMP.$PKG_BASE.cpu.out -trace=$TIMESTAMP.$PKG_BASE.trace.out -bench=.  $PKG > $TIMESTAMP.$PKG_BASE.benchmark.txt"
+    go test -benchmem -memprofile=$TIMESTAMP.$PKG_BASE.mem.out -cpuprofile=$TIMESTAMP.$PKG_BASE.cpu.out -trace=$TIMESTAMP.$PKG_BASE.trace.out -bench=.  $PKG > $TIMESTAMP.$PKG_BASE.benchmark.txt
+
+    mkdir -p $WORKING/$PKG_BASE
+    mv *$PKG_BASE* $WORKING/$PKG_BASE
+    echo ""
     echo "Don't forget to investigate $PKG_BASE test results using pprof"
     echo "go tool pprof -http=localhost:9999 $WORKING/$PKG_BASE/$PKG_BASE.test $WORKING/$PKG_BASE/$TIMESTAMP.$PKG_BASE.cpu.out"
     echo "go tool pprof -http=localhost:9999 -alloc_objects $WORKING/$PKG_BASE/$PKG_BASE.test $WORKING/$PKG_BASE/$TIMESTAMP.$PKG_BASE.mem.out"
+    echo "go tool trace -http=localhost:9999 $WORKING/$PKG_BASE/$PKG_BASE.test $WORKING/$PKG_BASE/$TIMESTAMP.$PKG_BASE.trace.out"
+    echo "======== END $PKG_BASE ========"
+
 done
+
 echo ""
 echo "-----------------------------"
 echo "Addition Tips"
