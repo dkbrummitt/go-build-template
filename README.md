@@ -53,3 +53,154 @@ Run `make push` to push the container image to `REGISTRY`.  Run `make all-push`
 to push the container images for all architectures.
 
 Run `make clean` to clean up.
+
+## Garden Tending
+
+### Comments
+
+Try to provide detailed comments when possible/relevant especially for public
+functions/methods. The format below is not required, but the content described
+below, offers things to consider.
+
+```go
+// FUNCTION/METHOD NAME descrition of what the method/function does
+//
+// Pre-Condition:
+// - are there any actions/states that are needed before this is executed
+// Post-Condition:
+// - are there any states that are affected after this is executed
+// Params:
+// - describe params if any, as well as param validation
+// Returns:
+// - describe return values if any, as well as expectations
+// Errors:
+// - describe conditons(s) where an error would be retured
+// Dev Notes:
+// - Notes to other maintainers/cliets that may be helpful
+```
+
+### errcheck
+
+Use a tool like errcheck to check for any unchecked errors in the code base.
+Sometimes uncheck errors are intended. This tool will help detect it when
+unintended.
+
+```sh
+go get -u github.com/kisielk/errcheck
+errcheck ./...
+```
+
+### Unit Testing
+
+#### What should have tests
+
+Functions/Methods should have a unit test if they meet any of the following:
+
+- Public facing
+- A bug was found in the method or function (public/private). Add a to verify bug-fix to ensure its not re-introduced
+- the complexity of the method/function is higher than 10. For both public and private.
+
+Codacy has a great [article](https://www.codacy.com/blog/an-in-depth-explanation-of-code-complexity/) on code complexity.
+
+Tools like [Sonarqube](https://www.sonarqube.org/), can help automate checking for code complexity. Added bonus, it supports a ridiculous number of languages.
+
+#### Too Small To Test
+
+Functions/Methods may be too small to test if the meet any of the following
+criteria:
+
+- do not have any logic branches (if, switch , loops)
+- is a simple getter/setter expecially if it does not have any side-effects
+
+#### Table Driven Tests
+Consider using table driven testing when necessary. Its a great way to both
+consolidate and outline test cases. It is also an EXCELLENT way to ensure
+that a single test can cover multiple logic branches in your code.
+
+```go
+
+    //define the important permutations...
+    tstCases := []struct {
+		//place imagination here
+	}{
+        {},
+        {},
+    }
+
+    for _,testCase := range tstCases{
+        // verify your test case
+    }
+```
+
+#### Executing tests
+
+Add flags to the test call
+
+`-failfast` to halt the tests at the first sign of trouble
+`-race` to check for race conditions. ESPECIALLY if you are using concurrency.
+
+NOTE: Adding -race can slow down test execution.
+
+```go
+go test -race -failfast ./...
+```
+
+### Benchmarking
+
+Use benchmarking to measure how fast your application is performaing. The
+variety of circumstances of when to/not-to write are benchmark are too vast,
+zso I will only say, if you feel its needed, add it.
+
+That said, here are a few flags that you may find usefule:
+
+- `-benchtime` to specify how long the bench should run (OPTIONAL)
+- `-benchmem`  to check memory during the bench testing (OPTIONAL)
+- `-bench` specify the regex of what should be benchmarked. (REQUIRED)
+- `count` how many times should the bench be executed (OPTIONAL)
+- `-cpu=1,4,8` benchmark concurrent that are using concurrency (OPTIONAL)
+
+```sh
+# run for 20 seconds
+go test -bench=. -benchtime=20s -count 3 ./...
+
+# run for 20 iterations
+go test -bench=. -benchtime=20x -count 3 ./...
+```
+
+Note, using benchtime with count is likely equivalent to mini stress testing your packages.
+
+Use Benchcmp to compare results between benchmarks
+
+```sh
+go get golang.org/x/tools/cmd/benchcmp
+go test -benchmem -bench=.  ./... > $(date '+%Y-%m-%dT%H:%M:%S').benchmark.txt
+go test -benchmem -bench=.  ./... > $(date '+%Y-%m-%dT%H:%M:%S').benchmark.txt
+benchcmp old.benchmark.txt new.benchmark.txt
+```
+
+Putting it all together
+
+The hack directory has a shellscript that will called profile.sh that will run the benchmarks and captures memory and cpu profile data.
+
+Usage:
+
+```sh
+hack/profile.sh
+```
+
+The results are stored in a directory that is created alled `generated` and is grouped by package names
+
+#### Stress Testing
+
+Memory and concurrency issues tend to bubble up more frequently when  under load/stress. Generating stress for your tests can help to expose
+these issues.
+
+the **hack** directory contains 2 shell scripts that support stress testing your package libs. Usage:
+
+```sh
+# stress test without checking for race conditions
+hack/stress.sh
+
+# stress test while checking for race conditions
+hack/stress-race.sh
+```
