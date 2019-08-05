@@ -15,40 +15,26 @@ import (
 func Test_GetVersionSimple(t *testing.T) {
 	// conditions where function will succeed
 	tstCases := []struct {
-		v  string // version
-		rd string // release(build) date
-		gv string // go version
+		v string // version
 	}{
 		// NOTE truth-table like pattern to organiz test conditions.
 		// Not required, but it does help to orgnize thoughts
-		{"UNKNOWN", "UNKNOWN", "UNKNOWN"}, // default nothing is set via ld-flags
-		{"UNKNOWN", "UNKNOWN", ""},
-		{"UNKNOWN", "", "UNKNOWN"},
-		{"UNKNOWN", "", ""},
-		{"", "UNKNOWN", "UNKNOWN"},
-		{"", "UNKNOWN", ""},
-		{"", "", "UNKNOWN"},
-		{"", "", ""},
-
-		{"UNKNOWN", "UNKNOWN", "1.12"},
-		{"UNKNOWN", "Feb 30, 2020", "UNKNOWN"},
-		{"UNKNOWN", "Feb 30, 2020", "1.12"},
-		{"1.0.0", "UNKNOWN", "UNKNOWN"},
-		{"1.0.0", "UNKNOWN", "1.12"},
-		{"1.0.0", "Feb 30, 2020", "UNKNOWN"},
-		{"1.0.0", "Feb 30, 2020", "1.12"},
+		{""},
+		{"UNKNOWN"},
+		{"0.0.0"},
 	}
 
 	for _, tstCase := range tstCases {
 		VERSION = tstCase.v
-		RELEASE_DATE = tstCase.rd
-		GO_VERSION = tstCase.gv
 
 		r := GetVersionSimple()
 		e := tstCase.v
 
-		if r != e {
-			t.Errorf("Expected version to be '%s'. Saw instead '%s'.  Case: '%s' '%s' '%s'", e, r, tstCase.v, tstCase.rd, tstCase.gv)
+		if tstCase.v != "" && tstCase.v != "UNKNOWN" && r != e {
+			t.Errorf("Expected version to be '%s'. Saw instead '%s'.  Case: '%s'", e, r, tstCase.v)
+		}
+		if (tstCase.v == "" || tstCase.v == "UNKNOWN") && r != "NO-STATIC-VERSION" {
+			t.Errorf("Expected version to be 'NO-STATIC-VERSION'. Saw instead '%s'.  Case: '%s' ", r, tstCase.v)
 		}
 	}
 
@@ -71,31 +57,52 @@ func Test_GetVersion(t *testing.T) {
 		v  string
 		rd string
 		gv string
+		gc string
 	}{
 		// NOTE truth-table like pattern to organiz test conditions.
 		// Not required, but it does help to orgnize thoughts
-		{"UNKNOWN", "UNKNOWN", "UNKNOWN"}, // default nothing is set via ld-flags
-		{"UNKNOWN", "UNKNOWN", ""},
-		{"UNKNOWN", "", "UNKNOWN"},
-		{"UNKNOWN", "", ""},
-		{"", "UNKNOWN", "UNKNOWN"},
-		{"", "UNKNOWN", ""},
-		{"", "", "UNKNOWN"},
-		{"", "", ""},
+		{"UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN"}, // default nothing is set via ld-flags
+		{"UNKNOWN", "UNKNOWN", "UNKNOWN", ""},
+		{"UNKNOWN", "UNKNOWN", "", "UNKNOWN"},
+		{"UNKNOWN", "UNKNOWN", "", ""},
+		{"UNKNOWN", "", "UNKNOWN", "UNKNOWN"},
+		{"UNKNOWN", "", "UNKNOWN", ""},
+		{"UNKNOWN", "", "", "UNKNOWN"},
+		{"UNKNOWN", "", "", ""},
 
-		{"UNKNOWN", "UNKNOWN", "1.12"},
-		{"UNKNOWN", "Feb 30, 2020", "UNKNOWN"},
-		{"UNKNOWN", "Feb 30, 2020", "1.12"},
-		{"1.0.0", "UNKNOWN", "UNKNOWN"},
-		{"1.0.0", "UNKNOWN", "1.12"},
-		{"1.0.0", "Feb 30, 2020", "UNKNOWN"},
-		{"1.0.0", "Feb 30, 2020", "1.12"},
+		{"", "UNKNOWN", "UNKNOWN", "UNKNOWN"},
+		{"", "UNKNOWN", "UNKNOWN", ""},
+		{"", "UNKNOWN", "", "UNKNOWN"},
+		{"", "UNKNOWN", "", ""},
+		{"", "", "UNKNOWN", "UNKNOWN"},
+		{"", "", "UNKNOWN", ""},
+		{"", "", "", "UNKNOWN"},
+		{"", "", "", ""},
+
+		{"0.0.0", "2019-02-30", "1.12", "ab12cd34"},
+		{"0.0.0", "2019-02-30", "1.12", ""},
+		{"0.0.0", "2019-02-30", "", "ab12cd34"},
+		{"0.0.0", "2019-02-30", "", ""},
+		{"0.0.0", "", "1.12", "ab12cd34"},
+		{"0.0.0", "", "1.12", ""},
+		{"0.0.0", "", "", "ab12cd34"},
+		{"0.0.0", "", "", ""},
+
+		{"", "2019-02-30", "1.12", "ab12cd34"},
+		{"", "2019-02-30", "1.12", ""},
+		{"", "2019-02-30", "", "ab12cd34"},
+		{"", "2019-02-30", "", ""},
+		{"", "", "1.12", "ab12cd34"},
+		{"", "", "1.12", ""},
+		{"", "", "", "ab12cd34"},
+		{"", "", "", ""},
 	}
 
 	for _, tstCase := range tstCases {
 		VERSION = tstCase.v
 		RELEASE_DATE = tstCase.rd
 		GO_VERSION = tstCase.gv
+		GIT_COMMIT = tstCase.gc
 
 		r := GetVersion()
 		// e := tstCase.v

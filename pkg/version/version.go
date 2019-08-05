@@ -8,6 +8,7 @@ var (
 	// VERSION is the global version string, which should be substituted with a
 	// real value during build via LDFLAGS.
 	VERSION = "UNKNOWN"
+
 	// RELEASE_DATE is the global release date string, which should be
 	// substituted with a real value during build via LDFLAGS.
 	RELEASE_DATE = "UNKNOWN"
@@ -15,6 +16,9 @@ var (
 	// GO_VERSION is the global go lang version string, which should be
 	// substituted with a real value during build via LDFLAGS.
 	GO_VERSION = "UNKNOWN"
+
+	// GIT_COMMIT it the git scm commit sha that was compiled. Th
+	GIT_COMMIT = "UNKNOWN"
 )
 
 // GetVersion global func that returns the formatted detailed version string
@@ -38,34 +42,29 @@ var (
 // - None
 // Dev Notes:
 // - None
-func GetVersion() string {
-	var vFormat = "%s"
-	var rFormat = "Released %s"
-	var gFormat = "(Go %s)"
-	var spf = "a"
+func GetVersion() (v string) {
 
 	if VERSION == "" || VERSION == "UNKNOWN" {
 		VERSION = "NO-STATIC-VERSION"
 	}
+	v = VERSION
+	if GIT_COMMIT != "" && GIT_COMMIT != "UNKNOWN" {
+		gcFormat := "Commit %s"
+		v = v + " " + gcFormat
+		v = fmt.Sprintf(v, GIT_COMMIT)
+	}
 	if RELEASE_DATE != "" && RELEASE_DATE != "UNKNOWN" {
-		vFormat = vFormat + " " + rFormat
-		spf += "b"
+		rFormat := "Released %s"
+		v = v + " " + rFormat
+		v = fmt.Sprintf(v, RELEASE_DATE)
 	}
 	if GO_VERSION != "" && GO_VERSION != "UNKNOWN" {
-		vFormat = vFormat + " " + gFormat
-		spf += "c"
+		gFormat := "(Go %s)"
+		v = v + " " + gFormat
+		v = fmt.Sprintf(v, GO_VERSION)
 	}
-	switch spf { // build version string based on what is provided
-	case "a":
-
-		return fmt.Sprintf(vFormat, VERSION)
-	case "ab":
-		return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE)
-	case "ac":
-		return fmt.Sprintf(vFormat, VERSION, GO_VERSION)
-	default:
-		return fmt.Sprintf(vFormat, VERSION, RELEASE_DATE, GO_VERSION)
-	}
+	fmt.Println("VERSION:", v)
+	return
 }
 
 // GetVersionSimple global func that returns the formatted detailed version
@@ -85,5 +84,10 @@ func GetVersion() string {
 // Dev Notes:
 //	- Having this as a function is overkill... I should probably nix it
 func GetVersionSimple() string {
+
+	if VERSION == "" || VERSION == "UNKNOWN" {
+		VERSION = "NO-STATIC-VERSION"
+	}
+
 	return VERSION
 }
