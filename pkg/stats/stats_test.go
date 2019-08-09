@@ -1,7 +1,6 @@
 package stats
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
@@ -69,7 +68,7 @@ func Test_PullStats(t *testing.T) {
 	if up, ok := tst1.AppDetails["uptime"]; ok && up == "UNKNOWN" {
 		t.Error("Expected AppDetails.upstime to be significant, instead saw UNKNOWN")
 	}
-	fmt.Printf("STATS: %+v", &tst1)
+	// fmt.Printf("STATS: %+v", &tst1)
 }
 
 func Benchmark_PullStats(b *testing.B) {
