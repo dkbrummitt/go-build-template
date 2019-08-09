@@ -63,7 +63,6 @@ func GetVersion() (v string) {
 		v = v + " " + gFormat
 		v = fmt.Sprintf(v, GO_VERSION)
 	}
-	fmt.Println("VERSION:", v)
 	return
 }
 
