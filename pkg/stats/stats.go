@@ -227,7 +227,7 @@ func (s *Stats) pullHost() (err error) {
 	return
 }
 
-// pullUptime if startTime is provided, then calcuate the amount of time this
+// pullAppUptime if startTime is provided, then calcuate the amount of time this
 // application has been running. Otherwise sets uptime as UNKNOWN
 //
 // Pre-Condition:
@@ -242,9 +242,9 @@ func (s *Stats) pullHost() (err error) {
 // - None
 // Dev Notes:
 // - None
-func (s *Stats) pullUptime() (err error) {
+func (s *Stats) pullAppUptime() (err error) {
 	if s == nil {
-		err = errors.New("Stats should be initialized before use. (pullUptime)")
+		err = errors.New("Stats should be initialized before use. (pullAppUptime)")
 		return
 	}
 	s.AppDetails["uptime"] = "UNKNOWN"
@@ -287,7 +287,7 @@ func (s *Stats) PullStats() (err error) {
 	err = s.pullCPU()
 	err = s.pullDisk()
 	err = s.pullHost()
-	err = s.pullUptime()
+	err = s.pullAppUptime()
 
 	if runtime.GOOS != s.SysDetails.OS {
 		s.SysDetails.OS = runtime.GOOS
@@ -312,8 +312,9 @@ func (s *Stats) PullStats() (err error) {
 func NewStats(opts Options) Stats {
 
 	s := Stats{}
+	// pre initializing AppDetails so App doesnt have too
+	s.AppDetails = make(map[string]interface{})
 	if !opts.StartTime.IsZero() {
-		s.AppDetails = make(map[string]interface{})
 		s.AppDetails["startTime"] = opts.StartTime
 	}
 
