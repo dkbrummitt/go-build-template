@@ -7,34 +7,29 @@ import (
 
 func Test_NewStats(t *testing.T) {
 	now := time.Now()
-	cases := []struct {
+	tstCases := []struct {
 		st time.Time //start time
 	}{
 		{},
 		{now},
 	}
 
-	for _, tstCase := range cases {
+	for _, tstCase := range tstCases {
 		opts := Options{
 			StartTime: tstCase.st,
 		}
 		result := NewStats(opts)
 
-		//If starttime isnt set, then I should not have app details to start
-		if tstCase.st.IsZero() && result.AppDetails != nil {
-			t.Errorf("Expected no App Details, got %+v", result.AppDetails)
-		}
-
 		// if starttime is set, then I should have app details
-		if !tstCase.st.IsZero() && result.AppDetails == nil {
-			t.Errorf("Expected App Details, got nil")
+		if result.AppDetails == nil {
+			t.Errorf("Expected App Details, got nil. Test Case: %+v", tstCase)
 		}
 
 		// if starttime is set, and app details is set, then I should have
 		// startime set in appdetails
 		if !tstCase.st.IsZero() && result.AppDetails != nil {
 			if _, ok := result.AppDetails["startTime"]; !ok {
-				t.Errorf("Expected AppDetails.startTime to be set, got instead %+v", result.AppDetails)
+				t.Errorf("Expected AppDetails.startTime to be set, got instead %+v. Test Case: %+v", result.AppDetails, tstCase)
 			}
 		}
 	}
