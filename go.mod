@@ -3,21 +3,21 @@ module github.com/dkbrummitt/go-build-template
 go 1.12
 
 require (
-	cloud.google.com/go v0.43.0 // indirect
+	cloud.google.com/go v0.44.0 // indirect
 	contrib.go.opencensus.io/exporter/jaeger v0.1.0
-	contrib.go.opencensus.io/exporter/ocagent v0.5.1
+	contrib.go.opencensus.io/exporter/ocagent v0.6.0
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0
 	github.com/DataDog/zstd v1.4.1 // indirect
 	github.com/Shopify/sarama v1.23.1 // indirect
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4 // indirect
-	github.com/census-instrumentation/opencensus-proto v0.2.1 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/go-kit/kit v0.9.0 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gogo/protobuf v1.2.2-0.20190730201129-28a6bbf47e48 // indirect
+	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/google/pprof v0.0.0-20190723021845-34ac40c74b70 // indirect
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.9.5 // indirect
@@ -42,12 +42,10 @@ require (
 	github.com/stretchr/objx v0.2.0 // indirect
 	go.opencensus.io v0.22.0
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
-	golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56 // indirect
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b // indirect
-	golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028 // indirect
+	golang.org/x/mobile v0.0.0-20190806162312-597adff16ade // indirect
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 // indirect
-	golang.org/x/tools v0.0.0-20190802220118-1d1727260058 // indirect
-	google.golang.org/genproto v0.0.0-20190801165951-fa694d86fc64 // indirect
+	golang.org/x/sys v0.0.0-20190804053845-51ab0e2deafa // indirect
+	golang.org/x/tools v0.0.0-20190809145639-6d4652c779c4 // indirect
 	google.golang.org/grpc v1.22.1 // indirect
 	gopkg.in/jcmturner/gokrb5.v7 v7.3.0 // indirect
 	gopkg.in/yaml.v2 v2.2.2 // indirect
