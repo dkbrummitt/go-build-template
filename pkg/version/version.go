@@ -48,6 +48,7 @@ func GetVersion() (v string) {
 		VERSION = "NO-STATIC-VERSION"
 	}
 	v = VERSION
+
 	if GIT_COMMIT != "" && GIT_COMMIT != "UNKNOWN" {
 		gcFormat := "Commit %s"
 		v = v + " " + gcFormat
