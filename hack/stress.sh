@@ -12,7 +12,6 @@
 # ID the working directory.
 #################
 WORKING=$(pwd)
-echo WORKING $WORKING
 
 # Find all of the tests that are NOT integration tests, isolating their directories
 #################
@@ -22,23 +21,26 @@ echo WORKING $WORKING
 # Mac flavored
 PKGS=(`find . -type f \( -name "*test.go" ! -iname "*integration*" \)  | sed -E 's|/[^/]+$||' |sort -u`)
 
-echo PKGS $PKGS
 
 # Compile the tests for each package
 # go test -c
 for PKG in "${PKGS[@]}"
 do
-    echo PKG $PKG
+    echo ""
+    echo "-----------------------------"
+    echo "Stress Testing $PKG"
+    echo "-----------------------------"
+
     go test -c $PKG
 
     # run the stress test for 60 seconds
     PKG_BASE=$(basename $PKG)
-    echo PKG_BASE $PKG_BASE
 
+    # Change the 60 value to change the duration of the stress test(s)
     END=$((SECONDS+60))
     while [ $SECONDS -lt $END ] ; do
-            export GOMAXPROCS=$[ 1 + $[ RANDOM % 128 ]]
-            ./$PKG_BASE.test $@ 2>&1
+        export GOMAXPROCS=$[ 1 + $[ RANDOM % 128 ]]
+        ./$PKG_BASE.test $@ 2>&1
     done
 
 done
