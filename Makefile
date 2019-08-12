@@ -27,7 +27,7 @@ VERSION := $(shell git describe --tags --always --dirty)
 # This Release Date sets the date of the build
 RELEASE_DATE := $(shell date +%Y-%m-%d,%H:%M:%S)
 GO_VERSION := $(shell go version |awk '{print $$3}'|sed 's/go//g')
-
+GIT_COMMIT := $(shell git describe --always)
 ###
 ### These variables should not need tweaking.
 ###
@@ -115,6 +115,7 @@ $(OUTBIN): .go/$(OUTBIN).stamp
 	        VERSION=$(VERSION)                                  \
 	        RELEASE_DATE=$(RELEASE_DATE)                        \
 	        GO_VERSION=$(GO_VERSION)                            \
+	        GIT_COMMIT=$(GIT_COMMIT)                            \
 	        ./build/build.sh                                    \
 	    "
 	@if ! cmp -s .go/$(OUTBIN) $(OUTBIN); then \
