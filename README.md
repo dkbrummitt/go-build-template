@@ -204,3 +204,24 @@ hack/stress.sh
 # stress test while checking for race conditions
 hack/stress-race.sh
 ```
+
+### Security
+
+Use a tool like [Go Sec](https://github.com/securego/gosec) to inspect code for security problems.
+
+```sh
+go get github.com/securego/gosec/cmd/gosec
+
+#run gosec enabling tests and vendor files. They are ignored by default.
+gosec -tests -vendor -fmt=json -out=results.json ./...
+```
+
+- Check out [Snyk's Vulnerability DB](https://snyk.io/vuln) for issues you should watchout for.
+- Read through [OWASP's Secure Coding Practices](https://github.com/OWASP/Go-SCP) guide for Golang
+- For more security inspiration look at [Awesome Golang Security](https://github.com/guardrailsio/awesome-golang-security)
+
+Want a shortcut? Checkout hack/security.sh
+
+```sh
+hack/security.sh
+```
