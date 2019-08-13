@@ -225,3 +225,42 @@ Want a shortcut? Checkout hack/security.sh
 ```sh
 hack/security.sh
 ```
+
+
+### Error Handling
+
+Error Handling will be handled in one of the 3 standard ways:
+
+```go
+// String based
+err := errors.New("something bad happened")
+```
+
+```go
+// format based
+err :=  fmt.Errorf("something bad happened")
+```
+
+```go
+// Custom
+type CustomError struct {
+    Code int
+    KeepGoing  bool
+    Message string
+}
+
+func (ce CustomError) Error(){
+    return fmt.Sprintf("%d:%t:%s", ce.Code, ce.KeepGoing, ce.Message)
+}
+//...
+if err := Foo(); err != nil {
+    switch e := err.(type) {
+    case *CustomError:
+        // Do something interesting with e.Line and e.Col.
+    case *SomeOtherError:
+        // Abort and file an issue.
+    default:
+        log.Println(e)
+    }
+}
+```
