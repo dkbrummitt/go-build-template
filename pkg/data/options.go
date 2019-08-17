@@ -1,6 +1,6 @@
 package data
 
-type DataOptions interface {
+type Options interface {
 	// Rule of thumb, accept interfaces (or bytes)
 	// return structs*
 	Validate() (bool, error)

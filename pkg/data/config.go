@@ -1,6 +1,6 @@
 package data
 
-type DataConfig interface {
+type Config interface {
 	// Rule of thumb, accept interfaces (or bytes)
 	// return structs*
 	Validate() (bool, error)
