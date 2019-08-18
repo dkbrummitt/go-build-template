@@ -1,44 +1,30 @@
 package data
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 type DataError struct {
-	Err    string
-	Code   int
-	Action string
+	Code    int
+	Message string
+	Action  string
+	Cause   error
 }
 
 func (de DataError) Error() string {
-	errPlc := 0
+	var e string
+	format := "%s %s %s %s"
 
-	if de.Err != "" {
-		errPlc++
-	}
-	if de.Code != 0 {
-		errPlc += 2
-	}
-	if de.Action != "" {
-		errPlc += 3
-	}
+	e = fmt.Sprintf(format, strconv.Itoa(de.Code), de.Message, de.Cause, de.Action)
+	e = strings.Replace(e, "%!s(<nil>)", "", -1) // account nils
+	e = strings.TrimLeft(e, "0")                 // remove code if it is not set
 
-	switch errPlc {
-	case 0:
-		return ""
-	case 1:
-		return fmt.Sprintf("%s", de.Err)
-	case 2:
-		return fmt.Sprintf("%d", de.Code)
-	case 3:
-		if de.Action == "" {
-			return fmt.Sprintf("%d:%s", de.Code, de.Err)
-		}
-		return fmt.Sprintf("%s", de.Action)
-	case 4:
-		return fmt.Sprintf("%s: CORRECTIVE ACTION %s", de.Err, de.Action)
-	case 5: //aka case 5
-		return fmt.Sprintf("%d: CORRECTIVE ACTION %s", de.Code, de.Action)
-	case 6: //aka case 5
-		return fmt.Sprintf("%d:%s: CORRECTIVE ACTION %s", de.Code, de.Err, de.Action)
+	for strings.Contains(e, "  ") { // make sure to remove all double spaces if encoutered
+		e = strings.Replace(e, "  ", " ", -1) // account for multiple empty strings
 	}
-	return ""
+	e = strings.Trim(e, " ") // remove trailing/leading whitespace
+
+	return e
 }

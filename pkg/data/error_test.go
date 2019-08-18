@@ -1,64 +1,92 @@
 package data
 
 import (
-	"fmt"
+	"errors"
+	"strconv"
 	"strings"
 	"testing"
 )
 
 func Test_DataError(t *testing.T) {
+	rc := errors.New("i am the glitch in the matrix")
 	tstCases := []struct {
-		e string
-		c int
-		a string
+		msg string
+		cde int
+		act string
+		coz error
 	}{
-		{},          // 0
-		{"", 0, ""}, // 0
+		{}, // empty error
 
-		{"", 0, "fix it"},   // 3
-		{"", 123, ""},       // 2
-		{"", 123, "fix it"}, // 5
+		{"", 0, "", nil}, // empty error
+		{"", 0, "", rc},
 
-		{"something bad happened", 0, ""},         // 1
-		{"something bad happened", 0, "fix it"},   // 4
-		{"something bad happened", 123, ""},       // 3
-		{"something bad happened", 123, "fix it"}, // 6
+		{"", 0, "fix it", nil},
+		{"", 0, "fix it", rc},
+
+		{"", 1, "", nil},
+		{"", 1, "", rc},
+
+		{"", 1, "fix it", nil},
+		{"", 1, "fix it", rc},
+
+		{"something bad happened", 0, "", nil},
+		{"something bad happened", 0, "", rc},
+
+		{"something bad happened", 0, "fix it", nil},
+		{"something bad happened", 0, "fix it", rc},
+
+		{"something bad happened", 1, "", nil},
+		{"something bad happened", 1, "", rc},
+
+		{"something bad happened", 1, "fix it", nil},
+		{"something bad happened", 1, "fix it", rc},
 	}
 
 	for _, tstCase := range tstCases {
-		de := DataError{tstCase.e, tstCase.c, tstCase.a}
+		de := DataError{tstCase.cde, tstCase.msg, tstCase.act, tstCase.coz}
 		err := de.Error()
-		if err == "" && (tstCase.e != "" || tstCase.c > 0 || tstCase.a != "") {
+
+		// err message is empty, but err is significant
+		if err == "" && (tstCase.msg != "" || tstCase.cde > 0 || tstCase.act != "" || tstCase.coz != nil) {
 			t.Errorf("Expected err message, but saw ''. Test Case: %+v", tstCase)
 		}
-		if tstCase.a == "" && strings.Contains(err, "CORRECTIVE ACTION") {
-			t.Errorf("Expected err message to not have a corrective action but saw '%s'. Test Case: %+v", err, tstCase)
-		}
-		if tstCase.a != "" && !strings.Contains(err, "CORRECTIVE ACTION") {
-			if !strings.Contains(err, tstCase.a) {
-				t.Errorf("Expected err message to have corrective action but saw '%s'. Test Case: %+v", err, tstCase)
-			}
-			if (tstCase.c != 0 || tstCase.e != "") && !strings.Contains(err, "CORRECTIVE ACTION") {
-				t.Errorf("Expected err message to specify corrective action but saw '%s'. Test Case: %+v", err, tstCase)
-			}
+
+		// error message should only contain significant codes (non-zero)
+		if tstCase.cde == 0 && strings.HasPrefix(err, "0") {
+			t.Errorf("Expected err message not contain error code but saw '%s'. Test Case: %+v", err, tstCase)
 		}
 
-		if tstCase.c != 0 && !strings.Contains(err, fmt.Sprintf("%d", tstCase.c)) {
-			t.Errorf("Expected err message to have a error code but saw '%s'. Test Case: %+v", err, tstCase)
+		// expect error message to contain any significant data provided
+		if tstCase.cde != 0 && !strings.HasPrefix(err, strconv.Itoa(tstCase.cde)) {
+			// if code is significant, then it should be in the error message
+			t.Errorf("Expected err message to have an error code but saw '%s'. Test Case: %+v", err, tstCase)
 		}
-		if tstCase.e != "" && !strings.Contains(err, tstCase.e) {
+
+		if tstCase.msg != "" && !strings.Contains(err, tstCase.msg) {
 			t.Errorf("Expected err message to have error message but saw '%s'. Test Case: %+v", err, tstCase)
 		}
 
-		if tstCase.e != "" && !strings.Contains(err, tstCase.e) {
-			t.Errorf("Expected err message to have error message but saw '%s'. Test Case: %+v", err, tstCase)
+		if tstCase.act != "" && !strings.Contains(err, tstCase.act) {
+			t.Errorf("Expected err message to have corrective action but saw '%s'. Test Case: %+v", err, tstCase)
 		}
+
+		if tstCase.coz != nil && !strings.Contains(err, tstCase.coz.Error()) {
+			t.Errorf("Expected err message to contain root cause but saw '%s'. Test Case: %+v", err, tstCase)
+		}
+
+		//all double spaces are removed
+		if strings.Contains(err, "  ") {
+			t.Errorf("Expected err message to not contain any double spaces '%s'. Test Case: %+v", err, tstCase)
+		}
+
+		// fmt.Println(fmt.Sprintf("Error '%s'", err))
 	}
 }
 
-func Benchmark_DataError(b *testing.B) {
+func Benchmark_DataError2(b *testing.B) {
+	rc := errors.New("i am the glitch in the matrix")
 	for ndx := 0; ndx < b.N; ndx++ {
-		de := DataError{"something bad happened", 999, "fix it"}
+		de := DataError{999, "something bad happened", "fix it", rc}
 		_ = de.Error()
 	}
 }
