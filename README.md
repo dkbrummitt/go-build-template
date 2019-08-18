@@ -226,7 +226,6 @@ Want a shortcut? Checkout hack/security.sh
 hack/security.sh
 ```
 
-
 ### Error Handling
 
 Error Handling will be handled in one of the 3 standard ways:
@@ -240,6 +239,8 @@ err := errors.New("something bad happened")
 // format based
 err :=  fmt.Errorf("something bad happened")
 ```
+
+For a small set of errors you can use type errors
 
 ```go
 // Custom
@@ -262,5 +263,38 @@ if err := Foo(); err != nil {
     default:
         log.Println(e)
     }
+}
+```
+
+If you dont't have a small set of errors or you dont know how many errors you will have, consider using behavior checks instead.
+This pattern is a bit more future-proof
+
+```go
+
+type customError interface{
+   BehaviorA() bool
+}
+type CustomError struct{}
+func (e CustomError) BehaviorA() bool {
+   return true
+}
+func (e CustomError) Error() string {
+   return "something bad happened!"
+}
+// this func could apply to multiple types
+func IsBehaviorA(e error) bool {
+   f, ok := e.(customError)
+   return ok && f.BehaviorA()
+}
+// specific to this error
+func IsBehaviorB(e error) bool {
+   _, ok := e.(CustomError)
+   return ok
+}
+main() {
+   err := caller()
+   if IsBehaviorB(err) || IsBehaviorA(err) {
+      // place imgination here
+   }
 }
 ```
