@@ -35,7 +35,8 @@ do
     # echo "go test -c $PKG"
     go test -c $PKG
 
-    # echo "go test -benchmem -memprofile=$TIMESTAMP.$PKG_BASE.mem.out -cpuprofile=$TIMESTAMP.$PKG_BASE.cpu.out -trace=$TIMESTAMP.$PKG_BASE.trace.out -bench=.  $PKG > $TIMESTAMP.$PKG_BASE.benchmark.txt"
+    # Run benchmarks to check mem and cpu usage.
+    # Note Mem will NOT tell you all of the mem used. It samples mem data, as a result, it shows you *trends*
     go test -benchmem -memprofile=$TIMESTAMP.$PKG_BASE.mem.out -cpuprofile=$TIMESTAMP.$PKG_BASE.cpu.out -trace=$TIMESTAMP.$PKG_BASE.trace.out -bench=.  $PKG > $TIMESTAMP.$PKG_BASE.benchmark.txt
 
     mkdir -p $WORKING/$PKG_BASE
@@ -44,6 +45,8 @@ do
     echo "Don't forget to investigate $PKG_BASE test results using pprof"
     echo "go tool pprof -http=localhost:9999 $WORKING/$PKG_BASE/$PKG_BASE.test $WORKING/$PKG_BASE/$TIMESTAMP.$PKG_BASE.cpu.out"
     echo "go tool pprof -http=localhost:9999 -alloc_objects $WORKING/$PKG_BASE/$PKG_BASE.test $WORKING/$PKG_BASE/$TIMESTAMP.$PKG_BASE.mem.out"
+    echo ""
+    echo "See what the program is doing, even when it is NOT running on the CPU"
     echo "go tool trace -http=localhost:9999 $WORKING/$PKG_BASE/$PKG_BASE.test $WORKING/$PKG_BASE/$TIMESTAMP.$PKG_BASE.trace.out"
     echo "======== END $PKG_BASE ========"
 
