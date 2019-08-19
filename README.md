@@ -267,7 +267,9 @@ if err := Foo(); err != nil {
 ```
 
 If you dont't have a small set of errors or you dont know how many errors you will have, consider using behavior checks instead.
-This pattern is a bit more future-proof
+This pattern is a bit more future-proof.
+
+Note: this is inspired by https://medium.com/@srfrog/i-wouldnt-recommend-using-type-checking-for-errors-b32accc77dd8
 
 ```go
 
