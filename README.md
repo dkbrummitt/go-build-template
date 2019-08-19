@@ -240,7 +240,7 @@ err := errors.New("something bad happened")
 err :=  fmt.Errorf("something bad happened")
 ```
 
-For a small set of errors you can use type errors
+For a small set of errors you can use type errors. You can find a demo on the [Golang tour](https://tour.golang.org/methods/19)
 
 ```go
 // Custom
