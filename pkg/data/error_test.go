@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -43,9 +44,10 @@ func Test_DataError(t *testing.T) {
 	}
 
 	for _, tstCase := range tstCases {
+		var tmpError error
 		de := DataError{tstCase.cde, tstCase.msg, tstCase.act, tstCase.coz}
 		err := de.Error()
-
+		tmpError = &de
 		// err message is empty, but err is significant
 		if err == "" && (tstCase.msg != "" || tstCase.cde > 0 || tstCase.act != "" || tstCase.coz != nil) {
 			t.Errorf("Expected err message, but saw ''. Test Case: %+v", tstCase)
@@ -79,11 +81,21 @@ func Test_DataError(t *testing.T) {
 			t.Errorf("Expected err message to not contain any double spaces '%s'. Test Case: %+v", err, tstCase)
 		}
 
+		//err should be a DataError
+		switch e := tmpError.(type) {
+		case nil:
+			t.Errorf("Expected err, got nil test case: %+v", tstCase)
+		case *DataError:
+			// its all good in the hood
+			fmt.Println("We're good!")
+		default:
+			t.Errorf("Expected DataErr, got somehthing different: %s %+v", e, tstCase)
+		}
 		// fmt.Println(fmt.Sprintf("Error '%s'", err))
 	}
 }
 
-func Benchmark_DataError2(b *testing.B) {
+func Benchmark_DataError(b *testing.B) {
 	rc := errors.New("i am the glitch in the matrix")
 	for ndx := 0; ndx < b.N; ndx++ {
 		de := DataError{999, "something bad happened", "fix it", rc}

@@ -13,7 +13,7 @@ type DataError struct {
 	Cause   error
 }
 
-func (de DataError) Error() string {
+func (de *DataError) Error() string {
 	var e string
 	format := "%s %s %s %s"
 
