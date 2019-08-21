@@ -10,7 +10,24 @@ http://github.com/dkbrummitt
 
 * A (very) Brief History of Go
 
-Some Text
+- Created by Googlers Robert Griesemer, Rob Pike, and Ken Thompson
+- Developed in 2007, but released on 2009
+- The mission
+
+    The goals of the Go project were to eliminate the slowness and clumsiness
+    of software development at Google, and thereby to make the
+    process more productive and scalable.
+
+    The language was designed by and for people
+    who write
+    and read
+    and debug
+    and maintain
+    large software systems.
+
+    – Rob Pike, Creator of Golang –
+
+
 
 * Cons of Go
 
@@ -111,32 +128,32 @@ Developers wind up closer to here as applications and services get more complex
 
 
 
-* Directory Structure - Flat Main
+* Directory Structure - Less Flat Main
 
-With a main that is usually very heavy
+With a main that is very skinny
 
     package main
 
-    import "fmt"
+    import (...)
 
-    func every(){    }
+    func initDBConnection(){ ... } (Data, err)
+    func initQueueConnection(){ ... } (Queue, err)
+    func initLogger(){ ... } (Log, err)
 
-    func thing(){    }
-
-    // place imaginiation here
-
-    // main a driver function for your application/script
     func main(){
-        // place imaginiation here
-        every()
-        thing()
-        under()
-        the()
-        sun()
+        db,err := initQueueConnection()
+        if err != nil{
+            // exit stage left...
+            return //quit early
+        }
+        q,err := initDBConnection()
+        if err != nil{
+            // exit stage right...
+            return //quit early
+        }
+        ctx := context.Background()
+        app :=api.NewApp(ctx, &db, &q, &log)
     }
-
-
-
 
 * Vendoring and Modules
 
