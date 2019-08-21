@@ -155,9 +155,25 @@ With a main that is very skinny
         app :=api.NewApp(ctx, &db, &q, &log)
     }
 
-* Vendoring and Modules
+* Dependency Managment, Vendoring and Modules
 
-* Build and Run
+* Build
+
+Building (aka compiling) Golang is very straight forward
+
+    go build # for very flat dir structures
+    go build ./... # to recurrsively all the files in your project
+
+.image compile.jpg 400 _
+
+* Run
+
+You *dont* have to compile to run your application locally.
+
+    go run main.go # for very flat
+    go run cmd/api/main.go for less flat
+
+You *do* have to compile to share the executable with other partners, vms, docker, ec2, etc
 
 * Libraries vs binaries
 
