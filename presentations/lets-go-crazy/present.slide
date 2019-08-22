@@ -25,8 +25,7 @@ http://github.com/dkbrummitt
     and maintain
     large software systems.
 
-    – Rob Pike, Creator of Golang –
-
+.caption _Go_at_Google_ by [[https://talks.golang.org/2012/splash.article][Rob Pike]]
 
 
 * Cons of Go
@@ -65,10 +64,29 @@ Install
 .link https://www.digitalocean.com/community/tutorials/how-to-install-go-and-set-up-a-local-programming-environment-on-windows-10 Using Chocolatey
 .link https://www.linode.com/docs/development/go/install-go-on-ubuntu/ Using linux
 
+* Conventions
+
+- Directory structures tend to be flat
+- .go file names are one word, Snake case (this_is_snake_case) if more than one word is needed
+- error messages should be a all lower case, and not contain puntuation
+- variable names tend to be very short
+- seeing all caps in Variables/Constants is very rare. (URL, ID are known exceptions)
+- else statements are supported, but not frequently used
+
+* Program Structure
+
+Golang programs typically consist of
+
+- Package declaration
+- imports
+- types, variables and constants
+- functions/methods
+- statements and expressions
+- comments
+
 * Directory Structure - Flat
 
 Most devlopers start here
-
 
     | go-project
      --> main.go
@@ -102,7 +120,6 @@ With a main that is usually very heavy
 * Directory Structure - Less Flat
 
 Developers wind up closer to here as applications and services get more complex
-
 
     | go-project
      --| cmd // for binaries
@@ -157,6 +174,34 @@ With a main that is very skinny
 
 * Dependency Managment, Vendoring and Modules
 
+Golang uses git to facilitate dependency managment.
+Need to share your code with others, commit it to a git repo, and they can import it
+
+    import(
+        "fmt" // import basic language support
+        "github.com/user/repo" // top level of a dependency
+        "github.com/user/repo/pkg/lib" // specific sub package
+    )
+
+A *module* is a collection of related Go packages that are versioned together as a single unit.
+This feature was released with Go 1.11. You can add module support with
+
+    go mod init
+
+Vendor is how to provide older Go programs their dependencies. You can add vendoring support Using
+
+    go mod vendor
+
+* Installing dependencies
+
+You can install dependencies on module projects variable
+
+    go get path/to/repo // explicit
+    go get ./... // implicitly installs after looking at import statements
+
+
+For vendored projects, the go mod vendor call, also installs the dependencies
+
 * Build
 
 Building (aka compiling) Golang is very straight forward
@@ -175,22 +220,79 @@ You *dont* have to compile to run your application locally.
 
 You *do* have to compile to share the executable with other partners, vms, docker, ec2, etc
 
-* Libraries vs binaries
+* Data types
 
-* Receivers
+    bool
 
-* Concurrency - Go Routines
+    string
 
-* Unit Testing
+    int  int8  int16  int32  int64
+    uint uint8 uint16 uint32 uint64 uintptr
 
-* Tools - fmt, returns, imports
+    byte // alias for uint8
 
-* Tools - errcheck
+    rune // alias for int32
+        // represents a Unicode code point
 
-* Tools - pprof
+    float32 float64
 
-* Tools - gcflags
+    complex64 complex128
 
-* Tools - Race
+* Variables and Contants - Global
 
-* Tools - gosec
+You do not have to use global variables
+
+    package main
+
+    var(
+        DebugMode = true // public variable, visible outside of package
+        seed = "-02349iyorhkgnmvki009eioryghj8" // not visible outside of package
+    )
+
+    const(
+        Pi = 3.1452
+    )
+
+* Variables - Local
+
+If you declare a local variable, you *must* use it.
+
+    func doSomething(){
+        a:= 1 // i am a short declaration
+        var i, j int = 1, 2 // i also am a short declaration
+        c, python, java := true, false, "no!" // i too am a short declaration
+
+        var done bool // i am a long declaration
+    }
+
+* Structs
+
+Structs are a collection of fields.
+
+.code main.go /show Dog type/,/end show Dog type/
+
+* Structs - Embedded
+
+You can embed structs into other structs
+
+.code main.go /show Pet type/,/end show Pet type/
+
+* Structs - Nested
+
+    // This pattern is useful when just dumping data out.
+    // But it is frowned on
+    type Configuration struct {
+        Val   string
+        Proxy struct {
+            Address string
+            Port    string
+        }
+    }
+
+* Functions
+
+Lets look at some code!
+
+* Questions
+
+.background questions.jpg

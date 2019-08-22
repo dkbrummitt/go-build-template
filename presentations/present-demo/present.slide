@@ -1,0 +1,132 @@
+Slide sample
+Demo of quick and dirty
+22 Aug 2019
+
+Delicia Brummitt
+
+http://dkbrummitt.com
+http://github.com/dkbrummitt
+@dkbrummitt
+
+* A Section
+
+Simple Text
+
+* Font
+
+*Bold* has the asterisk around the desired text
+
+    *Bold*
+
+_Italics_ has the underscore around the desired text
+
+    _Italics_
+
+`Program` has the accent around the desired text
+
+    `Program`
+
+* Lists/Bullets
+
+Lists are indicated lines that start with a hyphen
+
+- Item A
+- Item B
+- Item C
+
+    - Item A
+    - Item B
+    - Item C
+
+
+* Preformatted Text
+
+Preformatted text is indented in whatever way works for you.
+You *do* need a new line surrounding your formatted text
+
+- Single space as first line character
+- More than single space as first line character
+- Tab as first entry of line
+
+1 space
+
+ This is a single space
+
+3 spaces
+
+   this is 3 spaces
+
+* Images
+
+You can add an image using the following formats. And Captions!
+
+ .image path/to/image.jpg
+ .image path/to/image.jpg height width
+ .image path/to/image.jpg height _
+ .image path/to/image.jpg _ width
+ .caption _What is it_ by [[http:/ /www.example.com/][Who is it attributed to]]
+
+.image yaazz.jpg 200 _
+.caption _Meme_ by [[http://www.example.com][Jane Q. Public]]
+
+
+* Image Background
+
+.background yaazz.jpg
+Slides with Backgrounds may or may not show the slide header
+
+    .background path/to/image.jpg
+
+* Videos
+
+You can add an image using the following formats
+
+ .video path/to/video.mp4 encoding-type
+ .video path/to/video.mp4 encoding-type height width
+ .video path/to/video.mp4 encoding-type height _
+ .video path/to/video.mp4 encoding-type _ width
+
+.video trailer_480p.mp4 video/mp4 200 _
+
+* Code, full
+
+.code main.go
+
+* Code, by label
+
+You can show a portion of the code by referencing the commented labels
+
+    .code main.go /show label 1/,/end show label 1/
+
+.code main.go /show Dog type/,/end show Dog type/
+
+* Code, by regex
+
+You can show a portion of the code by regex
+
+    .code main.go /^func functionName/,/^}/
+
+.code main.go /^func main/,/^}/
+
+* Code, highlighting
+
+You can highligh or bold a line of code by adding a comment to your code that ends with
+HLxxx and specificing HLxxx in your slide
+
+    .code main.go /^func functionName/,/^}/ HLxxx
+
+.code main.go /^func main/,/^}/ HLfull
+
+*Note* the _xxx_ is text that makes sense to you. Look at the main.go file for an example
+
+* Run the code
+
+You can also run code from a slide.
+
+    .play main.go
+
+But the code segment *must* be small enough to appear on the slide
+
+* Run the code, demo
+
+.play main.go
