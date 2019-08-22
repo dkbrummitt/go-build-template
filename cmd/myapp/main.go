@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/dkbrummitt/go-build-template/pkg/stats"
 	"github.com/dkbrummitt/go-build-template/pkg/version"
@@ -14,7 +15,9 @@ func main() {
 
 	// Sample pull of stats data that can be logged or sent to monitoring
 	fmt.Println("System Stats:")
-	st := stats.NewStats(stats.Options{})
+	st := stats.NewStats(stats.Options{
+		StartTime: time.Now(),
+	})
 	st.PullStats()
 	// b, err := json.Marshal(st)
 	b, err := json.MarshalIndent(st, "", "  ")
