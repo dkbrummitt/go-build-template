@@ -37,6 +37,14 @@ go get ./...
 
 will be used instead
 
+## Talks
+
+Talks related to this project
+
+1. [Slides Demo](http://talks.godoc.org/github.com/dkbrummitt/go-build-template/presentations/present-demo/present.slide)
+2. [Getting Started](http://talks.godoc.org/github.com/dkbrummitt/go-build-template/presentations/lets-go-crazy//present.slide)
+
+
 ## Building
 
 Run `make` or `make build` to compile your app.  This will use a Docker image
