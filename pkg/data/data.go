@@ -7,12 +7,13 @@ import (
 )
 
 type Data interface {
-	// Rule of thumb, accept interfaces (or bytes)
-	// return structs*
-	Create(context.Context, []byte) (interface{}, error)
+	// Rule of thumb, accept interfaces (or bytes) as parameters
+	// return struct, bools, (concrete types)
+	Create(context.Context, []byte) error
 	Retrieve(context.Context, interface{}) (interface{}, error)
-	Update(context.Context, []byte, interface{}) (interface{}, error)
-	Delete(context.Context, interface{}) (interface{}, error)
+	Update(context.Context, []byte, interface{}) error
+	Delete(context.Context, interface{}) error
+	Find(context.Context, map[string]interface{}) (interface{}, error)
 	Ping(context.Context, *stats.Stats) error
 }
 
