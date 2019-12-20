@@ -1,6 +1,7 @@
 package version
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -33,8 +34,8 @@ func Test_GetVersionSimple(t *testing.T) {
 		if tstCase.v != "" && tstCase.v != "UNKNOWN" && r != e {
 			t.Errorf("Expected version to be '%s'. Saw instead '%s'.  Case: '%s'", e, r, tstCase.v)
 		}
-		if (tstCase.v == "" || tstCase.v == "UNKNOWN") && r != "NO-STATIC-VERSION" {
-			t.Errorf("Expected version to be 'NO-STATIC-VERSION'. Saw instead '%s'.  Case: '%s' ", r, tstCase.v)
+		if tstCase.v == "" && r != "UNKNOWN" {
+			t.Errorf("Expected version to be 'UNKNOWN'. Saw instead '%s'.  Case: '%s' ", r, tstCase.v)
 		}
 	}
 
@@ -107,8 +108,29 @@ func Test_GetVersion(t *testing.T) {
 		r := GetVersion()
 		// e := tstCase.v
 
+		// version string should never be empty
 		if r == "" {
-			t.Errorf("Expected version significant. Saw instead ''. Case: '%s' '%s' '%s'", tstCase.v, tstCase.rd, tstCase.gv)
+			t.Errorf("Expected version significant. Saw instead ''. Case: '%+v'", tstCase)
+		}
+
+		// if version is set and is NOT in the version string
+		if tstCase.v != "" && tstCase.v != "UNKNOWN" && !strings.Contains(r, tstCase.v) {
+			t.Errorf("Expected %s to be in the result. Case: '%+v'", tstCase.v, tstCase)
+		}
+
+		// if release date is set and is NOT in the version string
+		if tstCase.rd != "" && tstCase.rd != "UNKNOWN" && !strings.Contains(r, tstCase.rd) {
+			t.Errorf("Expected %s to be in the result. Case: '%+v'", tstCase.rd, tstCase)
+		}
+
+		// if golang version is set and is NOT in the version string
+		if tstCase.gv != "" && tstCase.gv != "UNKNOWN" && !strings.Contains(r, tstCase.gv) {
+			t.Errorf("Expected %s to be in the result. Case: '%+v'", tstCase.gv, tstCase)
+		}
+
+		// if git commit is set and is NOT in the version string
+		if tstCase.gc != "" && tstCase.gc != "UNKNOWN" && !strings.Contains(r, tstCase.gc) {
+			t.Errorf("Expected %s to be in the result. Case: '%+v'", tstCase.gc, tstCase)
 		}
 	}
 }

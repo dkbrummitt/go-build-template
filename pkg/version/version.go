@@ -24,10 +24,11 @@ var (
 // GetVersion global func that returns the formatted detailed version string
 // that contains version, release date, and go version used for this build.
 // Possible formats include:
-//  1.0.2
-//  1.0.2 2019-03-31
-//	1.02 Go 1.12.7
-//	1.02 2019-03-31 Go 1.12.7
+// 	UNKNOWN
+//  v1.0.2
+//  v1.0.2 2019-03-31
+//	v1.02 Go 1.12.7
+//	v1.02 2019-03-31 Go 1.12.7
 //
 // Pre-Condition:
 // - None
@@ -44,9 +45,10 @@ var (
 // - None
 func GetVersion() (v string) {
 
-	if VERSION == "" || VERSION == "UNKNOWN" {
-		VERSION = "NO-STATIC-VERSION"
+	if VERSION == "" {
+		VERSION = "UNKNOWN"
 	}
+
 	v = VERSION
 
 	if GIT_COMMIT != "" && GIT_COMMIT != "UNKNOWN" {
@@ -85,8 +87,8 @@ func GetVersion() (v string) {
 //	- Having this as a function is overkill... I should probably nix it
 func GetVersionSimple() string {
 
-	if VERSION == "" || VERSION == "UNKNOWN" {
-		VERSION = "NO-STATIC-VERSION"
+	if VERSION == "" {
+		VERSION = "UNKNOWN"
 	}
 
 	return VERSION
