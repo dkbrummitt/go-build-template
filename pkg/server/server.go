@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	_ "net/http/pprof"
+	"sync"
 
 	"github.com/dkbrummitt/go-build-template/pkg/version"
 )
@@ -57,10 +59,11 @@ func (s *Server) RegisterHandler(path string, handler http.Handler) {
 // - if errors while starting non-TLS server support
 // Dev Notes:
 // - None
-func (s Server) Run() (err error) {
+func (s Server) Run(wg *sync.WaitGroup) (srv *http.Server, err error) {
 	port := fmt.Sprintf(":%d", s.Port)
 	var cert string
 	var key string
+
 	// load certs if needed
 	if s.HasPush {
 		cert, key, err = loadCerts(s.Config)
@@ -70,16 +73,32 @@ func (s Server) Run() (err error) {
 	}
 	//register handlers/route
 	if s.HasProfiling {
+		fmt.Println("Profiling enabled")
 		s.RegisterHandler("/debug/", http.DefaultServeMux)
 	}
 	version.RegisterRoute(s.router)
-
-	//start the server
-	if s.HasPush {
-		err = http.ListenAndServeTLS(port, cert, key, s.router)
-	} else {
-		err = http.ListenAndServe(port, s.router)
+	srv = &http.Server{
+		Addr:    port,
+		Handler: s.router,
 	}
+
+	go func() {
+		defer func() {
+			fmt.Println("Server Shutdown complete!")
+			wg.Done() // notify shutdown is done
+		}()
+
+		//start the server
+		if s.HasPush {
+			err = srv.ListenAndServeTLS(cert, key)
+		} else {
+			err = srv.ListenAndServe()
+		}
+		if err != http.ErrServerClosed {
+			// unexpected error
+			fmt.Println("Run(): ", err)
+		}
+	}()
 
 	return
 }

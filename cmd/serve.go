@@ -16,7 +16,12 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/dkbrummitt/go-build-template/pkg/server"
 	"github.com/spf13/cobra"
@@ -33,30 +38,43 @@ var serveCmd = &cobra.Command{
 		o := server.Options{}
 		c := server.Config{}
 		c.Port, err = cmd.Flags().GetInt("port")
+		o.HasProfiling, err = cmd.Flags().GetBool("profile")
 		s, err := server.New(o, c)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		err = s.Run()
+
+		httpServerExitDone := &sync.WaitGroup{}
+		httpServerExitDone.Add(1)
+		srvr, err := s.Run(httpServerExitDone)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
+
+		ch := make(chan os.Signal, 1)
+		signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			for range ch {
+				fmt.Println("sudo shutdown now!")
+				if err := srvr.Shutdown(context.TODO()); err != nil {
+					panic(err) // failure/timeout shutting down the server gracefully
+				}
+
+				// wait for server to stop
+				fmt.Printf("main: done. exiting")
+			}
+		}()
+
+		httpServerExitDone.Wait() // wait for it all to end
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// serveCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// serveCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	serveCmd.Flags().IntP("port", "p", 8080, "Port Number for server")
+	serveCmd.Flags().BoolP("profile", "r", false, "Enable profiling")
 }
