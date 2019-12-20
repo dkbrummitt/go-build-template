@@ -5,6 +5,10 @@ import (
 	"net/http"
 )
 
+var (
+	path = "/api/v1/version"
+)
+
 // RegisterRoute Add server route support for paths '/version' and '/version/
 //
 // Pre-Condition:
@@ -22,8 +26,8 @@ import (
 func RegisterRoute(router *http.ServeMux) {
 	if router != nil {
 		// support with and without trailing slash
-		router.Handle("/version", http.HandlerFunc(handler))
-		router.Handle("/version/", http.HandlerFunc(handler))
+		router.Handle(path, http.HandlerFunc(handler))
+		router.Handle(path+"/", http.HandlerFunc(handler))
 	}
 }
 
@@ -48,6 +52,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		"releasDate": "%s",
 		"commit": "%s"
 	}`
-	p := fmt.Sprintf(f, VERSION, GO_VERSION, RELEASE_DATE, GIT_COMMIT)
-	w.Write([]byte(p))
+
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	w.Header().Set("Content-Type", "application/json")
+	switch r.Method {
+	case "OPTIONS":
+		//nothing to do, headers already set
+	case "GET":
+		p := fmt.Sprintf(f, VERSION, GO_VERSION, RELEASE_DATE, GIT_COMMIT)
+		w.Write([]byte(p))
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
 }
