@@ -308,3 +308,14 @@ main() {
    }
 }
 ```
+
+## General Conventions
+
+## Interfaces
+
+When using interface types:
+
+- parameters should be byte-slices or interfaces
+- returns should be concrete types. bools, struct, error, etc
+
+
