@@ -19,10 +19,10 @@ BIN := myapp
 REGISTRY ?= dkbrummitt
 
 # This version-strategy uses git tags to set the version string
-VERSION := $(shell git describe --tags --always --dirty)
+VERSION ?= $(shell git describe --tags --always --dirty)
 #
 # This version-strategy uses a manual value to set the version string
-#VERSION := 1.2.3
+#VERSION ?= 1.2.3
 
 # This Release Date sets the date of the build
 RELEASE_DATE := $(shell date +%Y-%m-%d,%H:%M:%S)
@@ -45,7 +45,7 @@ BASEIMAGE ?= gcr.io/distroless/static
 IMAGE := $(REGISTRY)/$(BIN)
 TAG := $(VERSION)__$(OS)_$(ARCH)
 
-BUILD_IMAGE ?= golang:1.12
+BUILD_IMAGE ?= golang:1.13-alpine
 
 # If you want to build all binaries, see the 'all-build' rule.
 # If you want to build all containers, see the 'all-container' rule.
@@ -157,8 +157,7 @@ container: .container-$(DOTFILE_IMAGE) say_container_name
 say_container_name:
 	@echo "container: $(IMAGE):$(TAG)"
 
-push: .push-$(DOTFILE_IMAGE) say_push_name
-.push-$(DOTFILE_IMAGE): .container-$(DOTFILE_IMAGE)
+push: .container-$(DOTFILE_IMAGE) say_push_name
 	@docker push $(IMAGE):$(TAG)
 
 say_push_name:
@@ -203,7 +202,7 @@ $(BUILD_DIRS):
 clean: container-clean bin-clean
 
 container-clean:
-	rm -rf .container-* .dockerfile-* .push-*
+	rm -rf .container-* .dockerfile-*
 
 bin-clean:
 	rm -rf .go bin

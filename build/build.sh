@@ -49,5 +49,5 @@ echo GO_VERSION: $GO_VERSION
 
 go install                                                      \
     -installsuffix "static"                                     \
--ldflags "-s -w -X $(go list -m)/pkg/version.VERSION=${VERSION} -X $(go list -m)/pkg/version.RELEASE_DATE=${RELEASE_DATE} -X $(go list -m)/pkg/version.GO_VERSION=${GO_VERSION}" -X $(go list -m)/pkg/version.GIT_COMMIT=${GIT_COMMIT} \
+-ldflags "-X $(go list -m)/pkg/version.VERSION=${VERSION} -X $(go list -m)/pkg/version.RELEASE_DATE=${RELEASE_DATE} -X $(go list -m)/pkg/version.GO_VERSION=${GO_VERSION}" -X $(go list -m)/pkg/version.GIT_COMMIT=${GIT_COMMIT} \
     ./...
