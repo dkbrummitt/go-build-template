@@ -1,6 +1,6 @@
 package data
 
-// Options contains configurations and feature switches to support
+// Options contains feature switches to support
 // various data/storage integrations.
 type Options interface {
 
