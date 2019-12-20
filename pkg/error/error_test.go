@@ -2,7 +2,6 @@ package error
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -87,7 +86,7 @@ func Test_AppError(t *testing.T) {
 			t.Errorf("Expected err, got nil test case: %+v", tstCase)
 		case *AppError:
 			// its all good in the hood
-			fmt.Println("We're good!")
+			// fmt.Println("We're good!")
 		default:
 			t.Errorf("Expected DataErr, got somehthing different: %s %+v", e, tstCase)
 		}
@@ -182,7 +181,7 @@ func Test_TransientError(t *testing.T) {
 			t.Errorf("Expected err, got nil test case: %+v", tstCase)
 		case *TransientError:
 			// its all good in the hood
-			fmt.Println("We're good!")
+			// fmt.Println("We're good!")
 		default:
 			t.Errorf("Expected DataErr, got somehthing different: %s %+v", e, tstCase)
 		}
