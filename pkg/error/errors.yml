@@ -1,0 +1,15 @@
+# Predefined errors that could happen globally through out the app.
+invalidConfiguration:
+  code: 1
+  action: update configuration(s) to ensure they meet the guidelines
+invalidOption:
+  code: 2
+  action: update option(s) to ensure they meet the guidelines
+readTimeout:
+  code: 3
+  action: retry this request after a cool down period, or increase the read timeout configuration
+  transient: true
+connectionTimeout:
+  code: 4
+  action: retry this request after a cool down period, or increase the connection timeout configuration
+  transient: true

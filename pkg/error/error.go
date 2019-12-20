@@ -1,7 +1,11 @@
 package error
 
 import (
+	"fmt"
+	"io/ioutil"
 	"strconv"
+
+	"gopkg.in/yaml.v2"
 )
 
 type AppError struct {
@@ -16,6 +20,18 @@ type TransientError struct {
 	Message    string
 	Cause      error
 	RetryCount int
+}
+
+type DefinedErrors struct {
+	// Name   string `yaml:name`
+	// Detail Detail `yaml:detail`
+	Errors map[string]Detail `yaml:"errors,omitempty"`
+}
+
+type Detail struct {
+	Code      int    `yaml:"code"`
+	Action    string `yaml:"action,omitempty"`
+	Transient bool   `yaml:"transient"`
 }
 
 func buildString(code int, message string, cause error) (e string) {
@@ -69,4 +85,32 @@ func (te *TransientError) Error() string {
 		e = e + "retry count: " + strconv.Itoa(te.RetryCount)
 	}
 	return e
+}
+
+func (de *DefinedErrors) Load() error {
+	var err error
+
+	//load only once
+	if len(de.Errors) > 0 {
+		//quit early,
+		return err
+	}
+
+	// read in the error yaml
+	f, err := ioutil.ReadFile("errors.yml")
+	if err != nil {
+		fmt.Println("warning: no defined errors detected")
+		return err
+	}
+	fmt.Println("YAML FILE:\n" + string(f))
+	// if successful, marshall errors into Defined errors
+	me := make(map[string]Detail)
+	err = yaml.Unmarshal(f, &me)
+	if err != nil {
+		fmt.Println("warning: defined errors detected, but unreadable")
+		return err
+	}
+	fmt.Printf("YAML Struct:\n%+v", me)
+	de.Errors = me
+	return err
 }

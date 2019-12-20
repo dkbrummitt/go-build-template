@@ -2,6 +2,7 @@ package error
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -194,4 +195,14 @@ func Benchmark_TransientError(b *testing.B) {
 		de := TransientError{999, "something bad happened", rc, ndx}
 		_ = de.Error()
 	}
+}
+
+func Test_Load(t *testing.T) {
+	de := DefinedErrors{}
+	err := de.Load()
+
+	if err != nil {
+		t.Errorf("Expected Dato load defailed defined errors, got error instead: %s ", err)
+	}
+	fmt.Printf("Defined Errors:%+v", de)
 }
