@@ -31,7 +31,7 @@ import (
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Start application HTTP(S) Server",
-	Long:  `Provide support as a server instead of ad-hoc/one-off calls`,
+	Long:  `Provide support as a server instead of ad-hoc/one-off requests`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		fmt.Println("serve called")
@@ -39,7 +39,8 @@ var serveCmd = &cobra.Command{
 		c := server.Config{}
 		c.Port, err = cmd.Flags().GetInt("port")
 		o.HasProfiling, err = cmd.Flags().GetBool("profile")
-		s, err := server.New(o, c)
+
+		s, err := server.NewServer(o, c)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -75,6 +76,6 @@ var serveCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
-	serveCmd.Flags().IntP("port", "p", 8080, "Port Number for server")
-	serveCmd.Flags().BoolP("profile", "r", false, "Enable profiling")
+	serveCmd.Flags().IntP("port", "p", 8080, "Port Number for server. Default 8000")
+	serveCmd.Flags().BoolP("profile", "r", false, "Enable profiling. Default false")
 }
