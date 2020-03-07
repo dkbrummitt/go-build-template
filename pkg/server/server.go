@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -18,7 +19,7 @@ type Server struct {
 	Config
 
 	router *http.ServeMux
-}
+} //of Server
 
 // RegisterHandler allow clients to register new routes/paths
 //
@@ -39,9 +40,11 @@ type Server struct {
 // - None
 func (s *Server) RegisterHandler(path string, handler http.Handler) {
 	s.router.Handle(path, handler)
-}
+} // of RegisterHandler
 
-// Run Starts the server with routes based on the provided configurations and options
+// Run Starts the server with routes based on the provided configurations and
+// options. If cert and key info is provided in options, the server will start
+// as an TLS (Push) server.
 //
 // Pre-Condition:
 // - Server is initialized
@@ -66,7 +69,7 @@ func (s Server) Run(wg *sync.WaitGroup) (srv *http.Server, err error) {
 
 	// load certs if needed
 	if s.HasPush {
-		cert, key, err = loadCerts(s.Config)
+		cert, key, err = loadCerts(s.Options)
 		if err != nil {
 			return
 		}
@@ -101,13 +104,29 @@ func (s Server) Run(wg *sync.WaitGroup) (srv *http.Server, err error) {
 	}()
 
 	return
-}
+} // of Run
 
-func New(opts Options, conf Config) (s Server, e error) {
-	if _, err := conf.Validate(); err != nil {
+// NewServer initializes a new server based on options and configs provided
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - opts Options or feature flags supported for this server
+// - conf Config or required settings for this server
+// Returns:
+// - instance of server
+// - errors if any
+// Errors:
+// - invalid port provided
+// Dev Notes:
+// - None
+func NewServer(opts Options, conf Config) (s Server, e error) {
+	if ok, err := conf.Validate(); ok && err != nil {
 		return
 	}
-	if _, err := opts.Validate(); err != nil {
+	if ok, err := opts.Validate(); ok && err != nil {
 		return
 	}
 	s = Server{
@@ -122,20 +141,40 @@ func New(opts Options, conf Config) (s Server, e error) {
 	s.router = http.NewServeMux()
 
 	return
-}
+} // of NewServer
 
-func loadCerts(c Config) (cert, key string, err error) {
-	certB, err := ioutil.ReadFile(c.CertFile)
+// loadCerts loads/reads certificate files provided
+// Pre-Condition:
+// - options param provided is properly initalized
+// Post-Condition:
+// - None
+// Params:
+// - Options, the server options
+// Returns:
+// - The servers certificate file if found
+// - The servers key file if found
+// Errors:
+// - when failure reading cert file
+// - when failure reading key file
+// Dev Notes:
+// - None
+func loadCerts(o Options) (cert, key string, err error) {
+	certB, err2 := ioutil.ReadFile(o.CertFile)
 	if err != nil {
-		return //quit early
+		err = err2
 	}
-	keyB, err := ioutil.ReadFile(c.KeyFile)
-	if err != nil {
-		return //quit early
+	keyB, err3 := ioutil.ReadFile(o.KeyFile)
+	if err3 != nil {
+		//maintain all error data
+		if err == nil {
+			err = err3
+		} else {
+			err = errors.New(err.Error() + "; " + err3.Error())
+		}
 	}
 
 	cert = string(certB)
 	key = string(keyB)
 
 	return
-}
+} // of loadCerts
