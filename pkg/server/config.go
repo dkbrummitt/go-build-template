@@ -2,16 +2,16 @@ package server
 
 import (
 	"fmt"
-	"io/ioutil"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Config contains settings and configurations support
 // various server integrations. Implements
 // pkg.Config
 type Config struct {
-	CertFile string
-	KeyFile  string
-	Port     int
+	Port int
+	Log  *logrus.Entry
 }
 
 // Validate verifys that
@@ -27,6 +27,7 @@ type Config struct {
 // Returns:
 // - true if valid configs provided, otherwise false
 // Errors:
+// - if Config is not initialized
 // - if one or more errors are detected
 // Dev Notes:
 // - None
@@ -34,40 +35,45 @@ func (c Config) Validate() (bool, error) {
 	var ok = false
 	var err error
 
-	// if cert is provided but not found
-	if c.CertFile != "" {
-		//check for file
-		_, err := ioutil.ReadFile(c.CertFile)
-		if err != nil {
-			//quit early
-			return ok, err
-		}
-	}
-
-	// if key is provided but not found
-	if c.KeyFile != "" {
-		//check for file
-		_, err := ioutil.ReadFile(c.KeyFile)
-		if err != nil {
-			//quit early
-			return ok, err
-		}
-	}
-
-	if !validPort(c.Port) {
-		err = fmt.Errorf("Port provided(%d) is invalid", c.Port)
+	if (Config{}) == c {
+		err = fmt.Errorf("server configuration not initialized")
 		return ok, err
 	}
+
+	if !c.validPort() {
+		err = fmt.Errorf("server configuration port provided(%d) is invalid", c.Port)
+		return ok, err
+	}
+
+	if c.Log == nil {
+		err = fmt.Errorf("log not provided")
+		return ok, err
+	}
+
+	// checks passed, set ok to true
 	ok = true
 	return ok, err
 }
 
-func (c *Config) LoadDefaults() {
-
-}
-
-func validPort(port int) (ok bool) {
-	if port >= 1 && port <= 65535 {
+// validPort verifies the port provided is within a port range. Note
+// a valid port is provided when it is between the 1025 and 65535, inclusive.
+// this allows for both registered ports (1025-49151)
+// and dynamic ports (49152-65535)
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - true if valid port provided, otherwise false
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func (c Config) validPort() (ok bool) {
+	if c.Port >= 1025 && c.Port <= 65535 {
 		ok = true
 	}
 
