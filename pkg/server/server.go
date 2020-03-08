@@ -23,6 +23,15 @@ type Server struct {
 	router *http.ServeMux
 } //of Server
 
+func DefaultHeaders(w http.ResponseWriter) {
+	allowedHeaders := "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token, If-Modified-Since, If-Unmodified-Since"
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, PATCH, POST, PUT")
+	w.Header().Set("Access-Control-Allow-Headers", allowedHeaders)
+	w.Header().Set("Server", "") // clear the server
+}
+
 // RegisterHandler allow clients to register new routes/paths
 //
 // Pre-Condition:
