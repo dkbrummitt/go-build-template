@@ -1,10 +1,15 @@
 package server
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"github.com/dkbrummitt/go-build-template/pkg/version"
 	"github.com/sirupsen/logrus"
+)
+
+const (
+	defaultServerTimeout = 30
 )
 
 // Options contains feature switches to support
@@ -15,6 +20,7 @@ type Options struct {
 	HasPush      bool
 	CertFile     string
 	KeyFile      string
+	Timeout      int
 } //of Options
 
 // Validate verifys that
@@ -103,6 +109,10 @@ func (o *Options) LoadDefaults() {
 	if err == nil && err2 == nil {
 		o.HasPush = true
 	}
+
+	if o.Timeout == 0 {
+		o.Timeout = defaultServerTimeout
+	}
 } // of LoadDefaults
 
 // DefaultLogger builds a default logrus logger
@@ -127,3 +137,22 @@ func DefaultLogger() *logrus.Entry {
 
 	return log
 } // of DefaultLogger
+
+// String provides a string representation of the state of this struct
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - string representation
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func (o Options) String() string {
+	oFmt := "HasProfiling:%v HasPush:%v Timeout:%v"
+	return fmt.Sprintf(oFmt, o.HasProfiling, o.HasPush, o.Timeout)
+}

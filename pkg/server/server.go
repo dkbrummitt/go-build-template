@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"sync"
+	"time"
 
 	"github.com/dkbrummitt/go-build-template/pkg/version"
 )
@@ -66,6 +68,10 @@ func (s Server) Run(wg *sync.WaitGroup) (srv *http.Server, err error) {
 	port := fmt.Sprintf(":%d", s.Port)
 	var cert string
 	var key string
+	w := s.Logger.Writer()
+	defer w.Close()
+
+	s.Log.Infof("starting server:%+s", s.String())
 
 	// load certs if needed
 	if s.HasPush {
@@ -76,18 +82,21 @@ func (s Server) Run(wg *sync.WaitGroup) (srv *http.Server, err error) {
 	}
 	//register handlers/route
 	if s.HasProfiling {
-		fmt.Println("Profiling enabled")
+		s.Log.Warn("Profiling enabled")
 		s.RegisterHandler("/debug/", http.DefaultServeMux)
 	}
 	version.RegisterRoute(s.router)
 	srv = &http.Server{
-		Addr:    port,
-		Handler: s.router,
+		ErrorLog:     log.New(w, "", 0),
+		Addr:         port,
+		Handler:      s.router,
+		ReadTimeout:  time.Duration(s.Options.Timeout) * time.Second,
+		WriteTimeout: time.Duration(s.Options.Timeout) * time.Second,
 	}
 
 	go func() {
 		defer func() {
-			fmt.Println("Server Shutdown complete!")
+			s.Log.Warn("Server Shutdown complete!")
 			wg.Done() // notify shutdown is done
 		}()
 
@@ -99,7 +108,7 @@ func (s Server) Run(wg *sync.WaitGroup) (srv *http.Server, err error) {
 		}
 		if err != http.ErrServerClosed {
 			// unexpected error
-			fmt.Println("Run(): ", err)
+			s.Log.Error("error starting server", err)
 		}
 	}()
 
@@ -178,3 +187,22 @@ func loadCerts(o Options) (cert, key string, err error) {
 
 	return
 } // of loadCerts
+
+// String provides a string representation of the state of this struct
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - string representation
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func (s Server) String() string {
+	sFmt := "Config:%v Options:%v"
+	return fmt.Sprintf(sFmt, s.Config.String(), s.Options.String())
+}

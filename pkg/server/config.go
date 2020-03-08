@@ -10,8 +10,9 @@ import (
 // various server integrations. Implements
 // pkg.Config
 type Config struct {
-	Port int
-	Log  *logrus.Entry
+	Port   int
+	Log    *logrus.Entry
+	Logger *logrus.Logger
 }
 
 // Validate verifys that
@@ -46,7 +47,12 @@ func (c Config) Validate() (bool, error) {
 	}
 
 	if c.Log == nil {
-		err = fmt.Errorf("log not provided")
+		err = fmt.Errorf("context log not provided")
+		return ok, err
+	}
+
+	if c.Logger == nil {
+		err = fmt.Errorf("logger not provided")
 		return ok, err
 	}
 
@@ -78,4 +84,23 @@ func (c Config) validPort() (ok bool) {
 	}
 
 	return
+}
+
+// String provides a string representation of the state of this struct
+//
+// Pre-Condition:
+// - None
+// Post-Condition:
+// - None
+// Params:
+// - None
+// Returns:
+// - string representation
+// Errors:
+// - None
+// Dev Notes:
+// - None
+func (c Config) String() string {
+	cFmt := ":%d"
+	return fmt.Sprintf(cFmt, c.Port)
 }
