@@ -34,7 +34,7 @@ var versionCmd = &cobra.Command{
 	- Golang version
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(version.GetVersion())
+		fmt.Println(version.String())
 	},
 }
 
