@@ -19,9 +19,11 @@ var (
 
 	// GIT_COMMIT it the git scm commit sha that was compiled. Th
 	GIT_COMMIT = "UNKNOWN"
+
+	AppName = "UNKNOWN"
 )
 
-// GetVersion global func that returns the formatted detailed version string
+// String global func that returns the formatted detailed version string
 // that contains version, release date, and go version used for this build.
 // Possible formats include:
 // 	UNKNOWN
@@ -43,13 +45,18 @@ var (
 // - None
 // Dev Notes:
 // - None
-func GetVersion() (v string) {
+func String() (v string) {
 
 	if VERSION == "" {
 		VERSION = "UNKNOWN"
 	}
 
-	v = VERSION
+	if AppName != "" && AppName != "UNKNOWN" {
+		v = AppName
+		v = v + " " + VERSION
+	} else {
+		v = VERSION
+	}
 
 	if GIT_COMMIT != "" && GIT_COMMIT != "UNKNOWN" {
 		gcFormat := "Commit %s"
