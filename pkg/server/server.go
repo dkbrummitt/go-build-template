@@ -24,9 +24,12 @@ type Server struct {
 } //of Server
 
 func DefaultHeaders(w http.ResponseWriter) {
+	// TODO externalize???
 	allowedHeaders := "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token, If-Modified-Since, If-Unmodified-Since, If-None-Match"
-
+	// TODO externalize origin
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// TODO externalize???
+
 	w.Header().Set("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, PATCH, POST, PUT")
 	w.Header().Set("Access-Control-Allow-Headers", allowedHeaders)
 	w.Header().Set("Server", "") // clear the server
@@ -219,6 +222,6 @@ func (o Options) loadCerts() (cert, key string, err error) {
 // Dev Notes:
 // - None
 func (s Server) String() string {
-	sFmt := "Config:%v Options:%v"
+	sFmt := "{Config: %v Options: %v}"
 	return fmt.Sprintf(sFmt, s.Config.String(), s.Options.String())
 }
