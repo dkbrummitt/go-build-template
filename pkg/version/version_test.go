@@ -52,7 +52,7 @@ func Benchmark_GetVersionSimple(b *testing.B) {
 
 // Test_GetVersion Benchmark test for performance testing to
 // determine potential improvements for this function
-func Test_GetVersion(t *testing.T) {
+func Test_String(t *testing.T) {
 	// conditions where function will succeed
 	tstCases := []struct {
 		v  string
@@ -105,7 +105,7 @@ func Test_GetVersion(t *testing.T) {
 		GO_VERSION = tstCase.gv
 		GIT_COMMIT = tstCase.gc
 
-		r := GetVersion()
+		r := String()
 		// e := tstCase.v
 
 		// version string should never be empty
@@ -137,9 +137,9 @@ func Test_GetVersion(t *testing.T) {
 
 // Benchmark_GetVersion Benchmark test for performance testing to
 // determine potential improvements for this function
-func Benchmark_GetVersion(b *testing.B) {
+func Benchmark_String(b *testing.B) {
 	// make a bunch of calls
 	for i := 0; i < b.N; i++ {
-		GetVersion()
+		String()
 	}
 }
