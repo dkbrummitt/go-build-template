@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -37,22 +38,23 @@ func (c Config) Validate() (bool, error) {
 	var err error
 
 	if (Config{}) == c {
-		err = fmt.Errorf("server configuration not initialized")
+		err = errors.New("server configuration not initialized")
 		return ok, err
 	}
 
 	if !c.validPort() {
-		err = fmt.Errorf("server configuration port provided(%d) is invalid", c.Port)
+		eFmt := "server configuration port provided(%d) is invalid"
+		err = errors.New(fmt.Sprintf(eFmt, c.Port))
 		return ok, err
 	}
 
 	if c.Log == nil {
-		err = fmt.Errorf("context log not provided")
+		err = errors.New("context log not provided")
 		return ok, err
 	}
 
 	if c.Logger == nil {
-		err = fmt.Errorf("logger not provided")
+		err = errors.New("logger not provided")
 		return ok, err
 	}
 

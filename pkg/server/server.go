@@ -1,7 +1,6 @@
 package server
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/dkbrummitt/go-build-template/pkg/version"
+	"github.com/pkg/errors"
 )
 
 // Server provides http(s) support to this application.
@@ -24,7 +24,7 @@ type Server struct {
 } //of Server
 
 func DefaultHeaders(w http.ResponseWriter) {
-	allowedHeaders := "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token, If-Modified-Since, If-Unmodified-Since"
+	allowedHeaders := "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token, If-Modified-Since, If-Unmodified-Since, If-None-Match"
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, PATCH, POST, PUT")
@@ -84,8 +84,9 @@ func (s Server) Run(wg *sync.WaitGroup) (srv *http.Server, err error) {
 
 	// load certs if needed
 	if s.HasPush {
-		cert, key, err = loadCerts(s.Options)
+		cert, key, err = s.Options.loadCerts()
 		if err != nil {
+			err = errors.Wrap(err, "load cert files failed")
 			return
 		}
 	}
@@ -112,8 +113,10 @@ func (s Server) Run(wg *sync.WaitGroup) (srv *http.Server, err error) {
 		//start the server
 		if s.HasPush {
 			err = srv.ListenAndServeTLS(cert, key)
+			err = errors.Wrap(err, "start of tls server failed")
 		} else {
 			err = srv.ListenAndServe()
+			err = errors.Wrap(err, "start of nontls server failed")
 		}
 		if err != http.ErrServerClosed {
 			// unexpected error
@@ -142,9 +145,11 @@ func (s Server) Run(wg *sync.WaitGroup) (srv *http.Server, err error) {
 // - None
 func NewServer(opts Options, conf Config) (s Server, e error) {
 	if ok, err := conf.Validate(); ok && err != nil {
+		err = errors.Wrap(err, "server config validation failed")
 		return
 	}
 	if ok, err := opts.Validate(); ok && err != nil {
+		err = errors.Wrap(err, "server options validation failed")
 		return
 	}
 	s = Server{
@@ -176,16 +181,18 @@ func NewServer(opts Options, conf Config) (s Server, e error) {
 // - when failure reading key file
 // Dev Notes:
 // - None
-func loadCerts(o Options) (cert, key string, err error) {
+func (o Options) loadCerts() (cert, key string, err error) {
 	certB, err2 := ioutil.ReadFile(o.CertFile)
 	if err != nil {
 		err = err2
+		err = errors.Wrap(err2, "error reading certificate file in configuration")
 	}
 	keyB, err3 := ioutil.ReadFile(o.KeyFile)
 	if err3 != nil {
 		//maintain all error data
 		if err == nil {
 			err = err3
+			err = errors.Wrap(err3, "error reading key file in configuration")
 		} else {
 			err = errors.New(err.Error() + "; " + err3.Error())
 		}

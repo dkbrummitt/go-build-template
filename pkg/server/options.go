@@ -3,9 +3,6 @@ package server
 import (
 	"fmt"
 	"io/ioutil"
-
-	"github.com/dkbrummitt/go-build-template/pkg/version"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -114,29 +111,6 @@ func (o *Options) LoadDefaults() {
 		o.Timeout = defaultServerTimeout
 	}
 } // of LoadDefaults
-
-// DefaultLogger builds a default logrus logger
-//
-// Pre-Condition:
-// - None
-// Post-Condition:
-// - None
-// Params:
-// - None
-// Returns:
-// - logrus entry as a logger
-// Errors:
-// - None
-// Dev Notes:
-// - None
-func DefaultLogger() *logrus.Entry {
-	logger := logrus.New()
-	log := logger.WithFields(logrus.Fields{
-		"version": version.GetVersionSimple(),
-	})
-
-	return log
-} // of DefaultLogger
 
 // String provides a string representation of the state of this struct
 //
