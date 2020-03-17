@@ -129,4 +129,4 @@ func (o *Options) LoadDefaults() {
 func (o Options) String() string {
 	oFmt := "HasProfiling:%v HasPush:%v Timeout:%v"
 	return fmt.Sprintf(oFmt, o.HasProfiling, o.HasPush, o.Timeout)
-}
+} // of String

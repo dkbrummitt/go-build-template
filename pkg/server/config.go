@@ -61,7 +61,7 @@ func (c Config) Validate() (bool, error) {
 	// checks passed, set ok to true
 	ok = true
 	return ok, err
-}
+} // of Validate
 
 // validPort verifies the port provided is within a port range. Note
 // a valid port is provided when it is between the 1025 and 65535, inclusive.
@@ -86,7 +86,7 @@ func (c Config) validPort() (ok bool) {
 	}
 
 	return
-}
+} // of validPort
 
 // String provides a string representation of the state of this struct
 //
@@ -103,6 +103,6 @@ func (c Config) validPort() (ok bool) {
 // Dev Notes:
 // - None
 func (c Config) String() string {
-	cFmt := ":%d"
+	cFmt := "Port: %d "
 	return fmt.Sprintf(cFmt, c.Port)
-}
+} // of String
