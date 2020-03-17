@@ -23,6 +23,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/dkbrummitt/go-build-template/pkg/logs"
 	"github.com/dkbrummitt/go-build-template/pkg/server"
 	"github.com/spf13/cobra"
 )
@@ -34,23 +35,29 @@ var serveCmd = &cobra.Command{
 	Long:  `Provide support as a server instead of ad-hoc/one-off requests`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
-		fmt.Println("serve called")
-		o := server.Options{}
-		c := server.Config{}
-		c.Port, err = cmd.Flags().GetInt("port")
-		o.HasProfiling, err = cmd.Flags().GetBool("profile")
+		srvOpts := server.Options{}
+		srvConf := server.Config{}
 
-		s, err := server.NewServer(o, c)
+		asJSON, _ := cmd.Flags().GetBool("json")
+		reportCaller, _ := cmd.Flags().GetBool("caller")
+		level, _ := cmd.Flags().GetString("level")
+
+		srvConf.Port, _ = cmd.Flags().GetInt("port")
+		srvOpts.HasProfiling, _ = cmd.Flags().GetBool("profile")
+		srvConf.Log, srvConf.Logger = logs.NewLogger(asJSON, reportCaller, level)
+
+		srv, err := server.NewServer(srvOpts, srvConf)
 		if err != nil {
-			fmt.Println(err)
+			srvConf.Log.Error("unable to create server with error ", err)
 			return
 		}
 
 		httpServerExitDone := &sync.WaitGroup{}
 		httpServerExitDone.Add(1)
-		srvr, err := s.Run(httpServerExitDone)
+		srvr, err := srv.Run(httpServerExitDone)
 		if err != nil {
-			fmt.Println(err)
+
+			srvConf.Log.Error("unsable to start server with error ", err)
 			return
 		}
 
@@ -60,11 +67,12 @@ var serveCmd = &cobra.Command{
 			for range ch {
 				fmt.Println("sudo shutdown now!")
 				if err := srvr.Shutdown(context.TODO()); err != nil {
+					srvConf.Log.Warnf("timeout hit during shutdown with error %s", err)
 					panic(err) // failure/timeout shutting down the server gracefully
 				}
 
 				// wait for server to stop
-				fmt.Printf("main: done. exiting")
+				srvConf.Log.Warn("main: done. exiting")
 			}
 		}()
 
@@ -76,6 +84,13 @@ var serveCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
+	// Server
 	serveCmd.Flags().IntP("port", "p", 8080, "Port Number for server. Default 8000")
 	serveCmd.Flags().BoolP("profile", "r", false, "Enable profiling. Default false")
+	serveCmd.Flags().IntP("timeout", "t", 30, "Timeout for server. Default 30 secs")
+
+	// Logging
+	serveCmd.Flags().BoolP("json", "j", true, "Enable JSON format logging. Default true")
+	serveCmd.Flags().BoolP("caller", "c", false, "Enable report caller logging. CAUSES SLOW PERFORMANCE Default false")
+	serveCmd.Flags().StringP("level", "l", "debug", "Specify log level. Default debug")
 }
