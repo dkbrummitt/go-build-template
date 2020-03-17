@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dkbrummitt/go-build-template/pkg/version"
+	"dkbrummitt/go-build-template/pkg/version"
 	"github.com/pkg/errors"
 )
 

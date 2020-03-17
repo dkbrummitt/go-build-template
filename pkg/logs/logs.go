@@ -1,11 +1,17 @@
-package cmd
+package logs
 
 import (
 	"reflect"
 	"strings"
 
-	"github.com/dkbrummitt/go-build-template/pkg/version"
+	"dkbrummitt/go-build-template/pkg/version"
+
 	"github.com/sirupsen/logrus"
+)
+
+var (
+	Logger        *logrus.Logger
+	ContextLogger *logrus.Entry
 )
 
 // NewLogger returns a new Logger(for Server logs) and LogEntry(for App Context logs)

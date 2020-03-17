@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dkbrummitt/go-build-template/pkg/stats"
+	"dkbrummitt/go-build-template/pkg/stats"
 	"github.com/spf13/cobra"
 )
 

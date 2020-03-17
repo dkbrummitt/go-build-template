@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/dkbrummitt/go-build-template/cmd"
+import "dkbrummitt/go-build-template/cmd"
 
 func main() {
   cmd.Execute()

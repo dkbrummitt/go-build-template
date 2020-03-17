@@ -20,7 +20,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/dkbrummitt/go-build-template/pkg/version"
+	"dkbrummitt/go-build-template/pkg/version"
 )
 
 // versionCmd represents the version command

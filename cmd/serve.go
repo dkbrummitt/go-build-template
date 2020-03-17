@@ -23,8 +23,9 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/dkbrummitt/go-build-template/pkg/logs"
-	"github.com/dkbrummitt/go-build-template/pkg/server"
+	"dkbrummitt/go-build-template/pkg/logs"
+	"dkbrummitt/go-build-template/pkg/server"
+
 	"github.com/spf13/cobra"
 )
 

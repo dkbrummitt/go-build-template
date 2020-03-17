@@ -1,4 +1,4 @@
-module github.com/dkbrummitt/go-build-template
+module dkbrummitt/go-build-template
 
 go 1.13
 
