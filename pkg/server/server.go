@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"dkbrummitt/go-build-template/pkg/version"
+
 	"github.com/pkg/errors"
 )
 
@@ -168,44 +168,6 @@ func NewServer(opts Options, conf Config) (s Server, e error) {
 
 	return
 } // of NewServer
-
-// loadCerts loads/reads certificate files provided
-// Pre-Condition:
-// - options param provided is properly initalized
-// Post-Condition:
-// - None
-// Params:
-// - Options, the server options
-// Returns:
-// - The servers certificate file if found
-// - The servers key file if found
-// Errors:
-// - when failure reading cert file
-// - when failure reading key file
-// Dev Notes:
-// - None
-func (o Options) loadCerts() (cert, key string, err error) {
-	certB, err2 := ioutil.ReadFile(o.CertFile)
-	if err != nil {
-		err = err2
-		err = errors.Wrap(err2, "error reading certificate file in configuration")
-	}
-	keyB, err3 := ioutil.ReadFile(o.KeyFile)
-	if err3 != nil {
-		//maintain all error data
-		if err == nil {
-			err = err3
-			err = errors.Wrap(err3, "error reading key file in configuration")
-		} else {
-			err = errors.New(err.Error() + "; " + err3.Error())
-		}
-	}
-
-	cert = string(certB)
-	key = string(keyB)
-
-	return
-} // of loadCerts
 
 // String provides a string representation of the state of this struct
 //

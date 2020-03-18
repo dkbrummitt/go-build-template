@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	path = "/api/v1/version"
+	path = "/version"
 )
 
 // RegisterRoute Add server route support for paths '/version' and '/version/
@@ -54,7 +54,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		"commit": "%s"
 	}`
 
-	// w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept")
 	w.Header().Set("Content-Type", "application/json")
